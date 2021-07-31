@@ -71,38 +71,44 @@ def readDataFromFile(filename):
 
 
 
-
-
-def EncodeData(row,i): # change data to numerical values
-    j = 0
-  
-    for item in row:
-        if j in  dict:
-            listDict = dict[j]
-            if item in listDict:
-                indextItem = listDict.index(item)
-                newArrayData[i][j] = indextItem
+'''
+Functions use a dictionary to encode strings of the array into numerical values. Key is the columns of the array [0 to 17] and values are a list of data items per row [0 to 45211] (strings) per column.
+If item is already in the value list, then its not added
+The string of data is converted to a numerical value using the index of the value list. 
+The index of the list  is then saved in the position of the string forming a new array containing numerical values, newArrayData 
+'''
+def EncodeData(row,i): # i is the row value
+    j = 0 # j is the column number used as the key in dictionary
+    
+    for item in row: 
+        if j in  dict: # if the column is already a key 
+            listDict = dict[j] # get the value (a list) for the key j 
+            if item in listDict: # if item in list dont add 
+                indextItem = listDict.index(item) # get index where item is in list. The index represents the numerical value of the string
+                newArrayData[i][j] = indextItem # store the numerical value (index) in the array to replace the string value
             else: 
                 listDict.append(item)
                 indextItem = listDict.index(item)
                 newArrayData[i][j] = indextItem
         else:
-            dict[j] = []
+            dict[j] = [] # create a list (will be value) for the key value pair
             listDict = dict[j]
             listDict.append(item)
             indextItem = listDict.index(item)
             newArrayData[i][j] = indextItem
             print(newArrayData[i][j])
-        j = j +1
+        j = j +1 # move to next column in the row
 
 
+'''
+Send through the each row of the array containing data to be encoded as a numerical value
+'''
 def seperateData(ArrayData,i):
     
     for row in ArrayData:
         EncodeData(row,i)
-        i = i+1
+        i = i+1 # row number
        
-    print(newArrayData)
     
     
 # def deleteColum(df,column):
