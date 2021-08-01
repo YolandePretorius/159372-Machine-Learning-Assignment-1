@@ -15,7 +15,7 @@ from scipy.optimize import _group_columns
 from scipy.linalg._solve_toeplitz import float64
     
 filenameIn = "bank-full.csv"
-filenameOut = "bank-fullOut.csv"
+# filenameTestIn = "bank.csv"
 df = 0
 dict = {}
 itemlist = []
@@ -75,11 +75,15 @@ def readDataFromFile(filename):
 def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
     if j in listNumericalData: # if the column is in the list representing the columns with numerical values in the array then add the numerical value other wise add the list indext number
-        itemtype = float64(item)
+ 
+        itemtype = float(item)
         newArrayData[i][j] = itemtype # store the numerical value (index) in the array to replace the string value
     else:
         newArrayData[i][j] = indextItem
 
+def addDataToNUllArray2(i,j,indextItem,item): # i: row number j: column number
+    # print(item.dtype)
+        newArrayData[i][j] = indextItem
 
 '''
 Functions use a dictionary to encode strings of the array into numerical values. Key is the columns of the array [0 to 17] and values are a list of data items per row [0 to 45211] (strings) per column.
@@ -127,15 +131,25 @@ def ageCategorization(newArrayData):
     newArrayData[np.where((newArrayData[:,0]>40) & (newArrayData[:,0]<=50)),0] = 3
     newArrayData[np.where((newArrayData[:,0]>50) & (newArrayData[:,0]<=60)),0] = 4
     newArrayData[np.where(newArrayData[:,0]>60),7] = 5 
+    return newArrayData
     
 def normalizeData(newArrayData):
-    targets = newArrayData[:,15]
+    targets = newArrayData[:,11]
     # newArrayData[:,:15] = newArrayData[:,:15]-newArrayData[:,:15].mean(axis=0)
     # newArrayData[:,:15] = newArrayData[:,:15]/newArrayData[:,:15].var(axis=0)
     newArrayData = (newArrayData - newArrayData.mean(axis=0))/newArrayData.var(axis=0)
     targets = (targets - targets.mean(axis=0))/targets.var(axis=0)
     print(targets[10:])
-    return newArrayData, targets
+    return newArrayData
+
+def normalizeData2(newArrayData):
+    # targets = newArrayData[:,15]
+    newArrayData[:,:11] = newArrayData[:,:11]-newArrayData[:,:11].mean(axis=0)
+    newArrayData[:,:11] = newArrayData[:,:11]/newArrayData[:,:11].var(axis=0)
+    # newArrayData = (newArrayData - newArrayData.mean(axis=1))/newArrayData.var(axis=0)
+    # targets = (targets - targets.mean(axis=1))/targets.var(axis=0)
+    print(newArrayData[10:])
+    return newArrayData
 
 def ShuffleDataRandomly(newArrayData):
     target = newArrayData[:,16]
@@ -147,7 +161,16 @@ def ShuffleDataRandomly(newArrayData):
     # print(target[10:])
     return newArrayData
 
-       
+#Obtained code from https://towardsdatascience.com/how-to-split-a-dataset-into-training-and-testing-sets-b146b1649830
+def seperateData70vs30(df): 
+    mask = (np.random.rand(len(df)) <= 0.8)
+    training_data = df[mask]
+    testing_data = df[~mask]
+    
+    # print(f"No. of training examples: {training_data.shape[0]}")
+    # print(f"No. of testing examples: {testing_data.shape[0]}")
+    return(training_data, testing_data)   
+
 def handle_non_numerical_data2(df):
     columns = df.columns.values
     
@@ -168,43 +191,73 @@ def handle_non_numerical_data2(df):
             
     return df        
     
-# def deleteColum(df,column):
-#     print(np.shape(df))
-#     newData = np.delete(df,column, axis=1)
-#     print(np.shape(newData))
-#     # print(deleteColumn7)
-#     return newData
-    
-# def changeDataToNull(df):
-#     df[np.where(df[:] == "unknown")] = None         
-#     print(df)
+def deleteColum(df,column):
+    print(np.shape(df))
+    newData = np.delete(df,column, axis=1)
+    print(np.shape(newData))
+    # print(deleteColumn7)
+    return newData
 #
-
-# PrepData.preprocessBank(filename, filenameOut)
-# print(filenameOut)
-
+# # def changeDataToNull(df):
+# #     df[np.where(df[:] == "unknown")] = None         
+# #     print(df)
+# #
+#
+# # PrepData.preprocessBank(filename, filenameOut)
+# # print(filenameOut)
+#
 numpy_df = readDataFromFile(filenameIn)
-# print(numpy_df)
+# # numpy_test_df = readDataFromFile(filenameTestIn)
+# # print(numpy_df)
+
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
 # df = handle_non_numerical_data(numpy_df)
 handle_non_numerical_data(numpy_df,i=0)
-
+print(newArrayData)
+#
+print(newArrayData[:10])
+newArrayData = ageCategorization(newArrayData)
+#
+# # print(np.shape(df))
+# #
 # print(newArrayData[:10])
-ageCategorization(newArrayData)
 
-print(np.shape(df))
 
+newArrayData=deleteColum(newArrayData,8)
+newArrayData=deleteColum(newArrayData,9)
+newArrayData=deleteColum(newArrayData,10)
+newArrayData=deleteColum(newArrayData,11)
+
+
+# newArrayData = normalizeData2(newArrayData)
+# # print("*********************************************")
 print(newArrayData[:10])
+# newArrayData = ShuffleDataRandomly(newArrayData)
+# # print("*********************************************")
+# # print(shuffledArray[:10])
+#
+training_data, testing_data = seperateData70vs30(newArrayData)
 
-newArrayData, targets = normalizeData(newArrayData)
-print("*********************************************")
-print(newArrayData[:10])
-shuffledArray = ShuffleDataRandomly(newArrayData)
-print("*********************************************")
-print(shuffledArray[:10])
+# print(f"No. of training examples: {training_data.shape[0]}")
+# print(f"No. of testing examples: {testing_data.shape[0]}")
+
+train_in = training_data[::,:11]
+train_tgt = training_data[::,11:12]
+
+testing_in = testing_data[::,:11]
+testing_tgt = testing_data[::,11:12]
 
 
+#train and test neural networks with different number of hidden neurons (i)
+for i in [1,2,5,10,20]:
+    print("----- "+str(i))
+    net = mlp.mlp(train_in,train_tgt,4,outtype='softmax')
+    # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
+    net.confmat(testing_in,testing_tgt)  
 
+
+# print(train_in,train_in)
+# print(train_tgt)
 
 # np.info(where)
 # numpy_df = binary(df)
@@ -229,3 +282,15 @@ print(shuffledArray[:10])
 # numpy_df = deleteColum(numpy_df,7) 
 # # print(np.where(numpy_df[:,18]=="unknown"))
 
+#######################Test If percepetron works###############################################
+
+# anddata = np.array([[0,0,0],[0,1,0],[1,0,0],[1,1,1]])
+# xordata = np.array([[0,0,0],[0,1,1],[1,0,1],[1,1,0]])
+# p = mlp.mlp(anddata[:,0:2],anddata[:,2:3],2)
+# p.mlptrain(anddata[:,0:2],anddata[:,2:3],0.25,1001)
+# p.confmat(anddata[:,0:2],anddata[:,2:3])
+# q = mlp.mlp(xordata[:,0:2],xordata[:,2:3],2)
+# q.mlptrain(xordata[:,0:2],xordata[:,2:3],0.25,5001)
+# q.confmat(xordata[:,0:2],xordata[:,2:3])
+
+#############################################################
