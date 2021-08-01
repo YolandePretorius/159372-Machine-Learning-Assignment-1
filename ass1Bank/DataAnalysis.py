@@ -11,12 +11,15 @@ from fileinput import filename
 from numpy import genfromtxt, where
 import csv
 import PrepData
+from scipy.optimize import _group_columns
+from scipy.linalg._solve_toeplitz import float64
     
 filenameIn = "bank-full.csv"
 filenameOut = "bank-fullOut.csv"
 df = 0
 dict = {}
 itemlist = []
+listNumericalData = [0,5,9,11,12,13,14]
 
 
 # jobs = ["admin","unknown","unemployed","management","housemaid","entrepreneur","student","blue-collar","self-employed","retired","technician","services"]
@@ -29,13 +32,13 @@ itemlist = []
 
 def readDataFromFile(filename):
  
-    # names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
-    # df = pandas.read_csv(fname,names=names)
-    # # print(df.head())
-    # # print(df.isnull())
-    # # print(pandas.isnull(df).sum())
+    names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
+    # df = pandas.read_csv(filename)
+    # print(df.head())
+    # print(df.isnull())
+    # print(pandas.isnull(df).sum())
     # np_df = df.values #converting panda data to numpy
-    # # print(np_df)
+    # print(np_df)
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
     
@@ -69,6 +72,13 @@ def readDataFromFile(filename):
 #     # df[np.where(df[:]=='yes'),4] = 1
 #     #
 
+def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
+    # print(item.dtype)
+    if j in listNumericalData: # if the column is in the list representing the columns with numerical values in the array then add the numerical value other wise add the list indext number
+        itemtype = float64(item)
+        newArrayData[i][j] = itemtype # store the numerical value (index) in the array to replace the string value
+    else:
+        newArrayData[i][j] = indextItem
 
 
 '''
@@ -83,33 +93,80 @@ def EncodeData(row,i): # i is the row value
     for item in row: 
         if j in  dict: # if the column is already a key 
             listDict = dict[j] # get the value (a list) for the key j 
+            
             if item in listDict: # if item in list dont add 
                 indextItem = listDict.index(item) # get index where item is in list. The index represents the numerical value of the string
-                newArrayData[i][j] = indextItem # store the numerical value (index) in the array to replace the string value
+                addDataToNUllArray(i,j,indextItem,item)
             else: 
                 listDict.append(item)
                 indextItem = listDict.index(item)
-                newArrayData[i][j] = indextItem
+                addDataToNUllArray(i,j,indextItem,item)
         else:
             dict[j] = [] # create a list (will be value) for the key value pair
             listDict = dict[j]
             listDict.append(item)
             indextItem = listDict.index(item)
-            newArrayData[i][j] = indextItem
+            addDataToNUllArray(i,j,indextItem,item)
             print(newArrayData[i][j])
         j = j +1 # move to next column in the row
 
-
+        
 '''
 Send through the each row of the array containing data to be encoded as a numerical value
 '''
-def seperateData(ArrayData,i):
-    
+def handle_non_numerical_data(ArrayData,i):
+
     for row in ArrayData:
-        EncodeData(row,i)
-        i = i+1 # row number
+            EncodeData(row,i)
+            i = i+1 # row number
        
+#Categorize the age data. <= 30 years is set to 1, 30-40 is set to 2, etc
+def ageCategorization(newArrayData):
+    newArrayData[np.where(newArrayData[:,0]<=30),0] = 1      
+    newArrayData[np.where((newArrayData[:,0]>30) & (newArrayData[:,0]<=40)),0] = 2
+    newArrayData[np.where((newArrayData[:,0]>40) & (newArrayData[:,0]<=50)),0] = 3
+    newArrayData[np.where((newArrayData[:,0]>50) & (newArrayData[:,0]<=60)),0] = 4
+    newArrayData[np.where(newArrayData[:,0]>60),7] = 5 
     
+def normalizeData(newArrayData):
+    targets = newArrayData[:,15]
+    # newArrayData[:,:15] = newArrayData[:,:15]-newArrayData[:,:15].mean(axis=0)
+    # newArrayData[:,:15] = newArrayData[:,:15]/newArrayData[:,:15].var(axis=0)
+    newArrayData = (newArrayData - newArrayData.mean(axis=0))/newArrayData.var(axis=0)
+    targets = (targets - targets.mean(axis=0))/targets.var(axis=0)
+    print(targets[10:])
+    return newArrayData, targets
+
+def ShuffleDataRandomly(newArrayData):
+    target = newArrayData[:,16]
+    order = np.arange(np.shape(newArrayData)[0])
+    np.random.shuffle(order)
+    newArrayData = newArrayData[order,:]
+    target = target[order]
+    # target = target[order]
+    # print(target[10:])
+    return newArrayData
+
+       
+def handle_non_numerical_data2(df):
+    columns = df.columns.values
+    
+    for column in columns:
+        text_digit_vals = {}
+        def convert_to_int(val):
+            return text_digit_vals[val]
+        
+        if df[column].dtype != np.int64 and df[column].dtype != np.float64:
+            column_contents = df[column].values.tolist()
+            unique_elements = set(column_contents)
+            x = 0
+            for unique in unique_elements:
+                if unique not in text_digit_vals:
+                    text_digit_vals[unique] = x
+                    x+=1
+            df[column] = list(map(convert_to_int, df[column]))
+            
+    return df        
     
 # def deleteColum(df,column):
 #     print(np.shape(df))
@@ -128,9 +185,26 @@ def seperateData(ArrayData,i):
 
 numpy_df = readDataFromFile(filenameIn)
 # print(numpy_df)
-newArrayData = np.zeros(np.shape(numpy_df))
-seperateData(numpy_df,i=0)
-print(newArrayData[-20:])
+newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
+# df = handle_non_numerical_data(numpy_df)
+handle_non_numerical_data(numpy_df,i=0)
+
+# print(newArrayData[:10])
+ageCategorization(newArrayData)
+
+print(np.shape(df))
+
+print(newArrayData[:10])
+
+newArrayData, targets = normalizeData(newArrayData)
+print("*********************************************")
+print(newArrayData[:10])
+shuffledArray = ShuffleDataRandomly(newArrayData)
+print("*********************************************")
+print(shuffledArray[:10])
+
+
+
 
 # np.info(where)
 # numpy_df = binary(df)
