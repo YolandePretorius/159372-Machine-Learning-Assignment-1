@@ -5,10 +5,11 @@ Created on 30/07/2021
 '''
 
 import numpy as np
+import pylab as pl
 import mlp
 import pandas
 from fileinput import filename
-from numpy import genfromtxt, where
+from numpy import genfromtxt, where, int0
 import csv
 import PrepData
 from scipy.optimize import _group_columns
@@ -41,10 +42,10 @@ def readDataFromFile(filename):
     # print(np_df)
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
-    
+        
     np_df = np.array(np_df[1:])
     
-    print(np.shape(np_df))
+    print("last column", np_df[::,16:17])
     return np_df
 
 
@@ -80,6 +81,7 @@ def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
         newArrayData[i][j] = itemtype # store the numerical value (index) in the array to replace the string value
     else:
         newArrayData[i][j] = indextItem
+
 
 def addDataToNUllArray2(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
@@ -123,14 +125,16 @@ def handle_non_numerical_data(ArrayData,i):
     for row in ArrayData:
             EncodeData(row,i)
             i = i+1 # row number
-       
+    
+    
 #Categorize the age data. <= 30 years is set to 1, 30-40 is set to 2, etc
 def ageCategorization(newArrayData):
     newArrayData[np.where(newArrayData[:,0]<=30),0] = 1      
     newArrayData[np.where((newArrayData[:,0]>30) & (newArrayData[:,0]<=40)),0] = 2
     newArrayData[np.where((newArrayData[:,0]>40) & (newArrayData[:,0]<=50)),0] = 3
     newArrayData[np.where((newArrayData[:,0]>50) & (newArrayData[:,0]<=60)),0] = 4
-    newArrayData[np.where(newArrayData[:,0]>60),7] = 5 
+    newArrayData[np.where(newArrayData[:,0]>60),0] = 5 
+
     return newArrayData
     
 def normalizeData(newArrayData):
@@ -142,10 +146,19 @@ def normalizeData(newArrayData):
     print(targets[10:])
     return newArrayData
 
-def normalizeData2(newArrayData):
+def normalizeData2(newArrayData,column):
+    min = np.min( newArrayData[:,column])
+    max = np.max( newArrayData[:,column])
+    
+    print(min)
+    print(max)
+    average = (max -min)
+    newArrayData[:,column] = newArrayData[:,column]-min
+    newArrayData[:,column] = newArrayData[:,column]/average
     # targets = newArrayData[:,15]
-    newArrayData[:,:11] = newArrayData[:,:11]-newArrayData[:,:11].mean(axis=0)
-    newArrayData[:,:11] = newArrayData[:,:11]/newArrayData[:,:11].var(axis=0)
+   
+    # newArrayData[:,column] = newArrayData[:,column]-newArrayData[:,column].mean(axis=0)
+    # newArrayData[:,column] = newArrayData[:,column]/newArrayData[:,column].var(axis=0)
     # newArrayData = (newArrayData - newArrayData.mean(axis=1))/newArrayData.var(axis=0)
     # targets = (targets - targets.mean(axis=1))/targets.var(axis=0)
     print(newArrayData[10:])
@@ -206,28 +219,84 @@ def deleteColum(df,column):
 # # PrepData.preprocessBank(filename, filenameOut)
 # # print(filenameOut)
 #
+
+    
+
+'''
+---------------------------------main------------------------------------------------
+'''
 numpy_df = readDataFromFile(filenameIn)
 # # numpy_test_df = readDataFromFile(filenameTestIn)
 # # print(numpy_df)
 
+print(np.shape(df))
+
+'''
+count yes vs no 
+
+'''
+
+BalanceSampling(numpy_df)
+print("number yes in validation data",np.sum(np.where(numpy_df[:,16] == "yes")))
+print("number no in validation data",np.sum(np.where(numpy_df[:,16] == "no")))     
+
+print("finding how many data is unknown", np.where(numpy_df[:] =='unknown' ))
+
+
+
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
 # df = handle_non_numerical_data(numpy_df)
+
+print(np.shape(df))
+
 handle_non_numerical_data(numpy_df,i=0)
+
+print(np.shape(newArrayData))
+
 print(newArrayData)
 #
 print(newArrayData[:10])
-newArrayData = ageCategorization(newArrayData)
+
+# newArrayData = ageCategorization(newArrayData)
+# pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
+# pl.show()
+
+
+
+
+'''
+normalizing data using min and max
+'''
+# newArrayData = normalizeData2(newArrayData,0)
+# newArrayData = normalizeData2(newArrayData,1)
+# newArrayData = normalizeData2(newArrayData,2)
+# newArrayData = normalizeData2(newArrayData,3)
+# newArrayData = normalizeData2(newArrayData,4)
+# newArrayData = normalizeData2(newArrayData,5)
+# newArrayData = normalizeData2(newArrayData,6)
+# newArrayData = normalizeData2(newArrayData,7)
+# newArrayData = normalizeData2(newArrayData,8)
+# newArrayData = normalizeData2(newArrayData,9)
+# newArrayData = normalizeData2(newArrayData,10)
+# newArrayData = normalizeData2(newArrayData,11)
+# newArrayData = normalizeData2(newArrayData,12)
+# newArrayData = normalizeData2(newArrayData,13)
+# newArrayData = normalizeData2(newArrayData,14)
+# pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
+# pl.show()
+
+
+
 #
 # # print(np.shape(df))
 # #
 # print(newArrayData[:10])
 
 
-newArrayData=deleteColum(newArrayData,8)
-newArrayData=deleteColum(newArrayData,9)
-newArrayData=deleteColum(newArrayData,10)
-newArrayData=deleteColum(newArrayData,11)
-
+#newArrayData=deleteColum(newArrayData,8)
+#newArrayData=deleteColum(newArrayData,9)
+#newArrayData=deleteColum(newArrayData,10)
+#newArrayData=deleteColum(newArrayData,11)
 
 # newArrayData = normalizeData2(newArrayData)
 # # print("*********************************************")
@@ -238,14 +307,22 @@ print(newArrayData[:10])
 #
 training_data, testing_data = seperateData70vs30(newArrayData)
 
+# distrubute__target_values_yes_No(training_data,testing_data)
+
 # print(f"No. of training examples: {training_data.shape[0]}")
 # print(f"No. of testing examples: {testing_data.shape[0]}")
+print(np.shape(training_data))
 
-train_in = training_data[::,:11]
-train_tgt = training_data[::,11:12]
+# valuesTraining = np.shape(training_data[0])
 
-testing_in = testing_data[::,:11]
-testing_tgt = testing_data[::,11:12]
+
+train_in = training_data[::,:16]
+train_tgt = training_data[::,16:17]
+
+print("training target values",train_tgt[-30:])
+
+testing_in = testing_data[::,:16]
+testing_tgt = testing_data[::,16:17]
 
 
 #train and test neural networks with different number of hidden neurons (i)
@@ -253,7 +330,8 @@ for i in [1,2,5,10,20]:
     print("----- "+str(i))
     net = mlp.mlp(train_in,train_tgt,4,outtype='softmax')
     # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
-    net.confmat(testing_in,testing_tgt)  
+    net.confmat(train_in,train_tgt) 
+    # net.confmat(testing_in,testing_tgt)  
 
 
 # print(train_in,train_in)
