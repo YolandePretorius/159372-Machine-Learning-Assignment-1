@@ -14,6 +14,7 @@ import csv
 import PrepData
 from scipy.optimize import _group_columns
 from scipy.linalg._solve_toeplitz import float64
+from matplotlib.pyplot import axis
     
 filenameIn = "bank-full.csv"
 # filenameTestIn = "bank.csv"
@@ -21,6 +22,7 @@ df = 0
 dict = {}
 itemlist = []
 listNumericalData = [0,5,9,11,12,13,14]
+
 
 
 # jobs = ["admin","unknown","unemployed","management","housemaid","entrepreneur","student","blue-collar","self-employed","retired","technician","services"]
@@ -210,7 +212,51 @@ def deleteColum(df,column):
     print(np.shape(newData))
     # print(deleteColumn7)
     return newData
-#
+
+def deleteRow(df,row):
+    print(np.shape(df))
+    newData = np.delete(df,row, axis=0)
+    print(np.shape(newData))
+    # print(deleteColumn7)
+    return newData
+
+
+def getRandomRow(DataArray):
+    shuffledData = ShuffleDataRandomly(DataArray)
+    row = shuffledData[:1]
+    return row
+    
+def AddtoArray(NewArrayData,row):
+    NewArrayData = np.append(NewArrayData, np.array(row),axis=0)
+    
+
+
+   
+# create a data set with a 1:1 ratio of yes and no values
+def BalanceSampling(DataArray, sizeArrayData):
+    yesCounter = 0
+    noCounter = 0
+    counter = 0
+    NewArrayData = []
+    numberYes = abs(sizeArrayData *0.5)
+    numberNo = abs(sizeArrayData *0.5)
+    row = getRandomRow(DataArray)
+    valueYesOrNo = row[::,16:17] 
+    
+    while(counter < sizeArrayData):  
+        if valueYesOrNo == 'yes' and yesCounter < numberYes:
+            AddtoArray(NewArrayData,row)
+            yesCounter+=1
+            deleteRow(DataArray,row)
+            counter=+1
+        if valueYesOrNo == 'no' and noCounter < numberNo:
+            AddtoArray(NewArrayData,row)
+            noCounter+=1
+            deleteRow(DataArray,row)
+            counter=+1
+        
+        
+        
 # # def changeDataToNull(df):
 # #     df[np.where(df[:] == "unknown")] = None         
 # #     print(df)
@@ -236,7 +282,8 @@ count yes vs no
 
 '''
 
-BalanceSampling(numpy_df)
+BalanceSampling(numpy_df, 50)
+
 print("number yes in validation data",np.sum(np.where(numpy_df[:,16] == "yes")))
 print("number no in validation data",np.sum(np.where(numpy_df[:,16] == "no")))     
 
