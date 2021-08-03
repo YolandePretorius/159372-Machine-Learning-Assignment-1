@@ -5,15 +5,15 @@ Created on 30/07/2021
 '''
 
 import numpy as np
+import pandas as pd
 import pylab as pl
 import mlp
-import pandas
 from fileinput import filename
 from numpy import genfromtxt, where, int0
 import csv
 import PrepData
 from scipy.optimize import _group_columns
-from scipy.linalg._solve_toeplitz import float64
+# from scipy.linalg._solve_toeplitz import float64
 from matplotlib.pyplot import axis
     
 filenameIn = "bank-full.csv"
@@ -47,7 +47,7 @@ def readDataFromFile(filename):
         
     np_df = np.array(np_df[1:])
     
-    print("last column", np_df[::,16:17])
+    # print("last column", np_df[::,16:17])
     return np_df
 
 
@@ -115,7 +115,7 @@ def EncodeData(row,i): # i is the row value
             listDict.append(item)
             indextItem = listDict.index(item)
             addDataToNUllArray(i,j,indextItem,item)
-            print(newArrayData[i][j])
+            # print(newArrayData[i][j])
         j = j +1 # move to next column in the row
 
         
@@ -145,15 +145,15 @@ def normalizeData(newArrayData):
     # newArrayData[:,:15] = newArrayData[:,:15]/newArrayData[:,:15].var(axis=0)
     newArrayData = (newArrayData - newArrayData.mean(axis=0))/newArrayData.var(axis=0)
     targets = (targets - targets.mean(axis=0))/targets.var(axis=0)
-    print(targets[10:])
+    # print(targets[10:])
     return newArrayData
 
 def normalizeData2(newArrayData,column):
     min = np.min( newArrayData[:,column])
     max = np.max( newArrayData[:,column])
     
-    print(min)
-    print(max)
+    # print(min)
+    # print(max)
     average = (max -min)
     newArrayData[:,column] = newArrayData[:,column]-min
     newArrayData[:,column] = newArrayData[:,column]/average
@@ -163,7 +163,7 @@ def normalizeData2(newArrayData,column):
     # newArrayData[:,column] = newArrayData[:,column]/newArrayData[:,column].var(axis=0)
     # newArrayData = (newArrayData - newArrayData.mean(axis=1))/newArrayData.var(axis=0)
     # targets = (targets - targets.mean(axis=1))/targets.var(axis=0)
-    print(newArrayData[10:])
+    # print(newArrayData[10:])
     return newArrayData
 
 def ShuffleDataRandomly(newArrayData):
@@ -178,7 +178,7 @@ def ShuffleDataRandomly(newArrayData):
 
 #Obtained code from https://towardsdatascience.com/how-to-split-a-dataset-into-training-and-testing-sets-b146b1649830
 def seperateData70vs30(df): 
-    mask = (np.random.rand(len(df)) <= 0.8)
+    mask = (np.random.rand(len(df)) <= 0.7)
     training_data = df[mask]
     testing_data = df[~mask]
     
@@ -207,9 +207,9 @@ def handle_non_numerical_data2(df):
     return df        
     
 def deleteColum(df,column):
-    print(np.shape(df))
+    # print(np.shape(df))
     newData = np.delete(df,column, axis=1)
-    print(np.shape(newData))
+    # print(np.shape(newData))
     # print(deleteColumn7)
     return newData
 
@@ -226,9 +226,13 @@ def getRandomRow(DataArray):
     row = shuffledData[:1]
     return row
     
-def AddtoArray(NewArrayData,row):
-    NewArrayData = np.append(NewArrayData, np.array(row),axis=0)
-    
+def AddtoArray(NewArrayData,row,row_n):
+    # NewArrayData = np.append(NewArrayData,[row],axis=0)
+    #NewArrayData =  np.concatenate((NewArrayData,[row]),axis= 0)
+    NewArrayData = np.insert(NewArrayData,row_n,[row],axis= 0)
+    # print(NewArrayData[:5])
+    # print(np.shape(NewArrayData))
+    return NewArrayData
 
 
    
@@ -237,26 +241,48 @@ def BalanceSampling(DataArray, sizeArrayData):
     yesCounter = 0
     noCounter = 0
     counter = 0
-    NewArrayData = []
+    
+    ShuffleDataRandomly(DataArray)
+    NewArrayData = np.array(DataArray[:1])
+    DataArray = deleteRow(DataArray,counter)
     numberYes = abs(sizeArrayData *0.5)
     numberNo = abs(sizeArrayData *0.5)
-    row = getRandomRow(DataArray)
-    valueYesOrNo = row[::,16:17] 
+    # NewArrayData = np.zeros(np.shape(DataArray[:sizeArrayData]))
+    # NewArrayData = np.array([])
+    # NewArrayData = []
+    counter += 1
+    valueYesOrNo = NewArrayData[:,-1]   
+    if valueYesOrNo == 'yes':
+        yesCounter+=1
+    else:
+        noCounter+=1
+    # row = getRandomRow(DataArray)
+    # valueYesOrNo = row[::,16:17] 
     
-    while(counter < sizeArrayData):  
-        if valueYesOrNo == 'yes' and yesCounter < numberYes:
-            AddtoArray(NewArrayData,row)
+    while(counter <= sizeArrayData-1): 
+        row = getRandomRow(DataArray)
+        valueYesOrNo = row[:,-1]  
+        if valueYesOrNo == 'yes' and yesCounter <= numberYes:
+            NewArrayData = AddtoArray(NewArrayData,row,counter)
             yesCounter+=1
-            deleteRow(DataArray,row)
-            counter=+1
+            # deleteRow(DataArray,row)
+            counter+=1
+          
         if valueYesOrNo == 'no' and noCounter < numberNo:
-            AddtoArray(NewArrayData,row)
+            NewArrayData = AddtoArray(NewArrayData,row,counter)
             noCounter+=1
-            deleteRow(DataArray,row)
-            counter=+1
+            # deleteRow(DataArray,row)
+            counter+=1
         
-        
-        
+    print("Done") 
+    number_Yes = np.where(NewArrayData[:,-1] == "yes")
+    number_No  =  np.where(NewArrayData[:,-1] == "no")                          
+    print("number yes in validation data",number_Yes)
+    print("number no in validation data",number_No)
+    print(NewArrayData[:,-1])
+    print(NewArrayData[:10])
+     
+    return  NewArrayData   
 # # def changeDataToNull(df):
 # #     df[np.where(df[:] == "unknown")] = None         
 # #     print(df)
@@ -275,34 +301,51 @@ numpy_df = readDataFromFile(filenameIn)
 # # numpy_test_df = readDataFromFile(filenameTestIn)
 # # print(numpy_df)
 
-print(np.shape(df))
+# number_YesOut1 = (np.where(numpy_df[:,-1] == "yes"))
+# number_NoOut1  =  (np.where(numpy_df[:,-1] == "no"))
+# print(np.shape(number_YesOut1)) 
+# print(np.shape(number_NoOut1)) 
+
+# balance the number yess and No output values
+numpy_df = BalanceSampling(numpy_df, 100)
+# print(numpy_df[:20])
 
 '''
 count yes vs no 
 
 '''
+# BalanceSampling(numpy_df, 50)
+number_YesOut = (np.where(numpy_df[:,-1] == "yes"))
+number_NoOut  =  (np.where(numpy_df[:,-1] == "no"))
+print(np.shape(number_YesOut)) 
+print(np.shape(number_NoOut))                         
+print("number yes in validation data",number_YesOut)
+print("number no in validation data",number_NoOut)
 
-BalanceSampling(numpy_df, 50)
 
-print("number yes in validation data",np.sum(np.where(numpy_df[:,16] == "yes")))
-print("number no in validation data",np.sum(np.where(numpy_df[:,16] == "no")))     
+# unKnownNumber = np.where(numpy_df[:] == 'unknown')
+# print("Unknown numbers", unKnownNumber)
 
-print("finding how many data is unknown", np.where(numpy_df[:] =='unknown' ))
+
+# print("finding how many data is unknown", np.where(numpy_df[:] =='unknown' ))
 
 
 
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
 # df = handle_non_numerical_data(numpy_df)
 
-print(np.shape(df))
+
 
 handle_non_numerical_data(numpy_df,i=0)
+# BalanceSampling(newArrayData, 50)
+
+# newArrayData = ageCategorization(newArrayData)
 
 print(np.shape(newArrayData))
 
-print(newArrayData)
+# print(newArrayData)
 #
-print(newArrayData[:10])
+print(newArrayData[:15])
 
 # newArrayData = ageCategorization(newArrayData)
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
@@ -314,28 +357,38 @@ print(newArrayData[:10])
 '''
 normalizing data using min and max
 '''
-# newArrayData = normalizeData2(newArrayData,0)
-# newArrayData = normalizeData2(newArrayData,1)
-# newArrayData = normalizeData2(newArrayData,2)
-# newArrayData = normalizeData2(newArrayData,3)
-# newArrayData = normalizeData2(newArrayData,4)
-# newArrayData = normalizeData2(newArrayData,5)
-# newArrayData = normalizeData2(newArrayData,6)
-# newArrayData = normalizeData2(newArrayData,7)
-# newArrayData = normalizeData2(newArrayData,8)
-# newArrayData = normalizeData2(newArrayData,9)
-# newArrayData = normalizeData2(newArrayData,10)
-# newArrayData = normalizeData2(newArrayData,11)
-# newArrayData = normalizeData2(newArrayData,12)
-# newArrayData = normalizeData2(newArrayData,13)
-# newArrayData = normalizeData2(newArrayData,14)
+newArrayData = normalizeData2(newArrayData,0) # age
+# newArrayData = normalizeData2(newArrayData,1) #job
+# newArrayData = normalizeData2(newArrayData,2) #marital
+# newArrayData = normalizeData2(newArrayData,3) #education
+# newArrayData = normalizeData2(newArrayData,4) #default
+newArrayData = normalizeData2(newArrayData,5) #balance
+# newArrayData = normalizeData2(newArrayData,6) #housing
+# newArrayData = normalizeData2(newArrayData,7) #loan
+# # newArrayData = normalizeData2(newArrayData,8) #contact
+newArrayData = normalizeData2(newArrayData,9) #day
+# # newArrayData = normalizeData2(newArrayData,10) #month
+newArrayData = normalizeData2(newArrayData,11) #duration
+newArrayData = normalizeData2(newArrayData,12) #campaign
+newArrayData = normalizeData2(newArrayData,13) #pdays
+newArrayData = normalizeData2(newArrayData,14) #previous
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
 # pl.show()
 
+'''
+randomly shuffle data
+'''
+newArrayData = ShuffleDataRandomly(newArrayData)
 
-
+'''
+remove column 10 and column 11 
+'''
+print(np.shape(newArrayData))
+newData = np.delete(newArrayData,11, axis=1)
+newData = np.delete(newData,10, axis=1)
+newData = np.delete(newData,8, axis=1)
 #
-# # print(np.shape(df))
+print(np.shape(newData))
 # #
 # print(newArrayData[:10])
 
@@ -347,12 +400,12 @@ normalizing data using min and max
 
 # newArrayData = normalizeData2(newArrayData)
 # # print("*********************************************")
-print(newArrayData[:10])
+
 # newArrayData = ShuffleDataRandomly(newArrayData)
 # # print("*********************************************")
 # # print(shuffledArray[:10])
 #
-training_data, testing_data = seperateData70vs30(newArrayData)
+training_data, testing_data = seperateData70vs30(newData)
 
 # distrubute__target_values_yes_No(training_data,testing_data)
 
@@ -363,19 +416,19 @@ print(np.shape(training_data))
 # valuesTraining = np.shape(training_data[0])
 
 
-train_in = training_data[::,:16]
-train_tgt = training_data[::,16:17]
+train_in = training_data[::,:13]
+train_tgt = training_data[::,13:14]
 
-print("training target values",train_tgt[-30:])
+# print("training target values",train_tgt[:])
 
-testing_in = testing_data[::,:16]
-testing_tgt = testing_data[::,16:17]
+testing_in = testing_data[::,:13]
+testing_tgt = testing_data[::,13:14]
 
 
 #train and test neural networks with different number of hidden neurons (i)
 for i in [1,2,5,10,20]:
     print("----- "+str(i))
-    net = mlp.mlp(train_in,train_tgt,4,outtype='softmax')
+    net = mlp.mlp(train_in,train_tgt,2,outtype='softmax')
     # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
     net.confmat(train_in,train_tgt) 
     # net.confmat(testing_in,testing_tgt)  
