@@ -306,6 +306,7 @@ def BalanceSampling(DataArray, sizeArrayData):
 ---------------------------------main------------------------------------------------
 '''
 numpy_df = readDataFromFile(filenameIn)
+
 # # numpy_test_df = readDataFromFile(filenameTestIn)
 # # print(numpy_df)
 
@@ -346,7 +347,7 @@ newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be use
 
 handle_non_numerical_data(numpy_df,i=0)
 
-newArrayData,oldData = BalanceSampling(newArrayData, 300)
+newArrayData,validData = BalanceSampling(newArrayData, 100)
 
 # BalanceSampling(newArrayData, 50)
 
@@ -438,6 +439,8 @@ testData, trainingData = seperateData70vs30(newData,sizeTestData)
 # print(np.shape(testData)[1])
 Data = np.shape(trainingData)[1]
 
+results = np.array([(1,0),(2,0),(5,0),(10,0),(20,0)])
+
 
 train_in = trainingData[::,:Data-1]
 train_tgt = trainingData[::,Data-1:Data]
@@ -449,14 +452,18 @@ testing_tgt = testData[::,Data-1:Data]
 
 
 #train and test neural networks with different number of hidden neurons (i)
-for i in [20,30,40,50,60,100]:
+for idx,i in np.ndenumerate(results[:,0]):
     print("----- "+str(i))
-    net = mlp.mlp(train_in,train_tgt,2)
+    net = mlp.mlp(train_in,train_tgt,i,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
     # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
     net.mlptrain(train_in,train_tgt,0.015,100)
-    net.confmat(train_in,train_tgt) 
-    net.confmat(testing_in,testing_tgt)  
+    net.confmat(train_in,train_tgt)
+    net.earlystopping(train_in,train_tgt,testing_in,testing_tgt,0.1) 
+    results[idx,1] =net.confmat(testing_in,testing_tgt)  
 
+
+pl.plot(results[:,0],results[:,1])
+pl.show()
 
 # print(train_in,train_in)
 # print(train_tgt)
