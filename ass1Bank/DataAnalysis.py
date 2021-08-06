@@ -5,6 +5,7 @@ Created on 30/07/2021
 '''
 
 import numpy as np
+import math
 import pandas as pd
 import pylab as pl
 import mlp
@@ -252,8 +253,8 @@ def BalanceSampling(DataArray, sizeArrayData):
     ShuffleDataRandomly(DataArray)
     NewArrayData = np.array(DataArray[:1])
     DataArray = deleteRow(DataArray,0)
-    numberYes = abs(sizeArrayData *0.5)
-    numberNo = abs(sizeArrayData *0.5)
+    numberYes = round(sizeArrayData *0.5)
+    numberNo = round(sizeArrayData *0.5)
     # NewArrayData = np.zeros(np.shape(DataArray[:sizeArrayData]))
     # NewArrayData = np.array([])
     # NewArrayData = []
@@ -300,7 +301,14 @@ def BalanceSampling(DataArray, sizeArrayData):
 # # print(filenameOut)
 #
 
-    
+
+def KFoldcrossValidationData(data,numberfolds):
+    numnerRows = (np.shape(data)[0])
+    numnerRowsPerfold = np.array_split(data,numberfolds, axis = 0)
+    print(numnerRowsPerfold[0])
+    # diagonalOnesTable = np.zeros((numberfolds,numberfolds))
+    diagonalOnesTable = np.eye(numberfolds, numberfolds)
+    return numnerRowsPerfold, diagonalOnesTable
 
 '''
 ---------------------------------main------------------------------------------------
@@ -424,6 +432,8 @@ newData = np.delete(newData,8, axis=1)
 sizeTestData = (np.shape(newData)[0])*0.3
 testData, trainingData = seperateData70vs30(newData,sizeTestData)
 
+folds, diagonalOnes = KFoldcrossValidationData(trainingData,5)
+
 # distrubute__target_values_yes_No(training_data,testing_data)
 
 # print(f"No. of training examples: {training_data.shape[0]}")
@@ -437,10 +447,11 @@ testData, trainingData = seperateData70vs30(newData,sizeTestData)
 
 # print(np.shape(trainingData)[1])
 # print(np.shape(testData)[1])
+
 Data = np.shape(trainingData)[1]
 
-results = np.array([(1,0),(2,0),(5,0),(10,0),(20,0)])
-
+# results = np.array([(1,0),(2,0),(5,0),(10,0),(20,0)])
+results = np.array([1,2,5,10,20])
 
 train_in = trainingData[::,:Data-1]
 train_tgt = trainingData[::,Data-1:Data]
@@ -451,19 +462,42 @@ testing_in = testData[::,:Data-1]
 testing_tgt = testData[::,Data-1:Data]
 
 
-#train and test neural networks with different number of hidden neurons (i)
-for idx,i in np.ndenumerate(results[:,0]):
-    print("----- "+str(i))
-    net = mlp.mlp(train_in,train_tgt,i,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
-    # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
-    net.mlptrain(train_in,train_tgt,0.015,100)
-    net.confmat(train_in,train_tgt)
-    net.earlystopping(train_in,train_tgt,testing_in,testing_tgt,0.1) 
-    results[idx,1] =net.confmat(testing_in,testing_tgt)  
+for x in diagonalOnes:
+    trainingDatafolds = []
+    validationData = []
+    for y in x:
+        y =int(y)
+        if y == 0:
+            if np.shape(trainingDatafolds)[0]== 0:
+                trainingDatafolds = folds[y]
+                print(np.shape(trainingDatafolds))
+            else:
+                # trainingDatafolds = np.append(folds[y])   
+            
+                trainingDatafolds = np.append(trainingDatafolds,folds[y],axis=0)
+                print(np.shape(trainingDatafolds))
+            
+            
+            
+        else:
+            validationData  = folds[y]
+            # validationData.append(folds[y])
+            # np.concatenate((validationData,folds[y]),axis=1)
+             #train and test neural networks with different number of hidden neurons (i)
+            print(np.shape(validationData))
+             
+    # for i in results:
+    #     print("----- "+str(i))
+    #     net = mlp.mlp(train_in,train_tgt,1,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
+    #     # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1)
+    #     net.mlptrain(train_in,train_tgt,0.015,100)
+    #     net.confmat(train_in,train_tgt)
+    #     net.earlystopping(train_in,train_tgt,testing_in,testing_tgt,0.1) 
+    #     net.confmat((testing_in,testing_tgt))     #train and test neural networks with different number of hidden neurons (i)
 
 
-pl.plot(results[:,0],results[:,1])
-pl.show()
+# pl.plot(results[:,0],results[:,1])
+# pl.show()
 
 # print(train_in,train_in)
 # print(train_tgt)
