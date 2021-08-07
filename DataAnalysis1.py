@@ -13,6 +13,7 @@ from fileinput import filename
 from numpy import genfromtxt, where, int0
 import csv
 from scipy.optimize import _group_columns
+# from scipy.linalg._solve_toeplitz import float64
 from matplotlib.pyplot import axis
     
 filenameIn = "bank-full.csv"
@@ -44,6 +45,30 @@ def readDataFromFile(filename):
     # print("last column", np_df[::,16:17])
     return np_df
 
+
+# def binary(df):
+#     yesString = 'yes'
+#     noString = 'no'
+#
+#     for s in df:
+#         if s.find(yesString)>-1:
+#
+#
+#     # newdf = np.where(df =='no',1,0)
+#     # newdf= df[np.where(df[:,17] =='yes'),17] = 1
+#
+#     # df = np.where(df == 'no', 0, df)
+#     # # df = np.where(df == 'yes', 1, df)
+#     # x = np.where(df == 'yes')
+#     # df[np.where(df[:]=='yes'),4] = 1
+#     print(newdf)
+#
+#     return newdf
+#     # np.where(x < 5, x, -1)
+#     # df[np.where(df[:,column]<10),column] =0   
+#     # df[np.where(df[:]=='no'),4] = 0
+#     # df[np.where(df[:]=='yes'),4] = 1
+#     #
 
 def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
@@ -145,31 +170,42 @@ def ShuffleDataRandomly(newArrayData):
     # print(target[10:])
     return newArrayData
 
+#Obtained code from https://towardsdatascience.com/how-to-split-a-dataset-into-training-and-testing-sets-b146b1649830
+# def seperateData70vs30(df): 
+#
+#
+#     mask = (np.random.rand(len(df)) <= 0.7)
+#     training_data = df[mask]
+#     testing_data = df[~mask]
+#
+#     # print(f"No. of training examples: {training_data.shape[0]}")
+#     # print(f"No. of testing examples: {testing_data.shape[0]}")
+#     return(training_data, testing_data)  
 
 def seperateData70vs30(df,percentageTesting):
     testData, trainingData = BalanceSampling(df,percentageTesting)
     return testData, trainingData 
      
 
-# def handle_non_numerical_data2(df):
-#     columns = df.columns.values
-#
-#     for column in columns:
-#         text_digit_vals = {}
-#         def convert_to_int(val):
-#             return text_digit_vals[val]
-#
-#         if df[column].dtype != np.int64 and df[column].dtype != np.float64:
-#             column_contents = df[column].values.tolist()
-#             unique_elements = set(column_contents)
-#             x = 0
-#             for unique in unique_elements:
-#                 if unique not in text_digit_vals:
-#                     text_digit_vals[unique] = x
-#                     x+=1
-#             df[column] = list(map(convert_to_int, df[column]))
-#
-#     return df        
+def handle_non_numerical_data2(df):
+    columns = df.columns.values
+    
+    for column in columns:
+        text_digit_vals = {}
+        def convert_to_int(val):
+            return text_digit_vals[val]
+        
+        if df[column].dtype != np.int64 and df[column].dtype != np.float64:
+            column_contents = df[column].values.tolist()
+            unique_elements = set(column_contents)
+            x = 0
+            for unique in unique_elements:
+                if unique not in text_digit_vals:
+                    text_digit_vals[unique] = x
+                    x+=1
+            df[column] = list(map(convert_to_int, df[column]))
+            
+    return df        
     
 def deleteColum(df,column):
     # print(np.shape(df))
@@ -192,29 +228,37 @@ def getRandomRow(DataArray):
     return row
     
 def AddtoArray(NewArrayData,row,row_n):
+    # NewArrayData = np.append(NewArrayData,[row],axis=0)
+    #NewArrayData =  np.concatenate((NewArrayData,[row]),axis= 0)
     NewArrayData = np.insert(NewArrayData,row_n,[row],axis= 0)
+    # print(NewArrayData[:5])
+    # print(np.shape(NewArrayData))
     return NewArrayData
 
 
    
 # create a data set with a 1:1 ratio of yes and no values
 def BalanceSampling(DataArray, sizeArrayData):
-    yesCounter = 0 # count the number yes target values is in the newArrayData
-    noCounter = 0 #count the number no target values is in the newArrayData
+    yesCounter = 0
+    noCounter = 0
     counter = 0
     
     ShuffleDataRandomly(DataArray)
-    NewArrayData = np.array(DataArray[:1]) # add the first row of data to the array
-    DataArray = deleteRow(DataArray,0) # Delete row to ensure that the data from original array is not added more than once.
-    numberYes = round(sizeArrayData *0.5) #Divide the data 50% maximum number yes values to be added to the array
-    numberNo = round(sizeArrayData *0.5) #Divide the data 50% no
-
+    NewArrayData = np.array(DataArray[:1])
+    DataArray = deleteRow(DataArray,0)
+    numberYes = round(sizeArrayData *0.5)
+    numberNo = round(sizeArrayData *0.5)
+    # NewArrayData = np.zeros(np.shape(DataArray[:sizeArrayData]))
+    # NewArrayData = np.array([])
+    # NewArrayData = []
     counter += 1
     valueYesOrNo = NewArrayData[:,-1]   
     if valueYesOrNo == 1:
         yesCounter+=1
     else:
         noCounter+=1
+    # row = getRandomRow(DataArray)
+    # valueYesOrNo = row[::,16:17] 
     
     while(counter <= sizeArrayData-1): 
         row = getRandomRow(DataArray)
@@ -229,20 +273,33 @@ def BalanceSampling(DataArray, sizeArrayData):
             NewArrayData = AddtoArray(NewArrayData,row,counter)
             DataArray = deleteRow(DataArray,0)
             noCounter+=1
-            counter+=1     
- 
+            counter+=1
+        
+    # print("Done") 
+    # number_Yes = np.where(NewArrayData[:,-1] == 1)
+    # number_No  =  np.where(NewArrayData[:,-1] == 0)                          
+    # print("number yes in validation data",number_Yes)
+    # print("number no in validation data",number_No)
+    # print(NewArrayData[:,-1])
+    # print(NewArrayData[:10])
+    # print(DataArray[:10])
+     
     return  NewArrayData, DataArray  
-
-
 # # def changeDataToNull(df):
 # #     df[np.where(df[:] == "unknown")] = None         
 # #     print(df)
+# #
+#
+# # PrepData.preprocessBank(filename, filenameOut)
+# # print(filenameOut)
+#
 
 
-# create a array with ones and diagonal values 
 def KFoldcrossValidationData(data,numberfolds):
-    numnerRows = (np.shape(data)[0]) # determine the number rows in the array
-    numnerRowsPerfold = np.array_split(data,numberfolds, axis = 0) # split data in folds required
+    numnerRows = (np.shape(data)[0])
+    numnerRowsPerfold = np.array_split(data,numberfolds, axis = 0)
+    # print(numnerRowsPerfold[0])
+    # diagonalOnesTable = np.zeros((numberfolds,numberfolds))
     diagonalOnesTable = np.eye(numberfolds, numberfolds)
     return numnerRowsPerfold, diagonalOnesTable
 
@@ -254,31 +311,49 @@ print(np.shape(numpy_df))
 
 numpy_df = ShuffleDataRandomly(numpy_df)
 
+# # numpy_test_df = readDataFromFile(filenameTestIn)
+# # print(numpy_df)
 
-'''
-count yes vs no 
-
-'''
 # number_YesOut1 = (np.where(numpy_df[:,-1] == "yes"))
 # number_NoOut1  =  (np.where(numpy_df[:,-1] == "no"))
 # print(np.shape(number_YesOut1)) 
 # print(np.shape(number_NoOut1)) 
 
+# balance the number yess and No output values
+# numpy_df,oldData = BalanceSampling(numpy_df, 100)
+# print(numpy_df[:20])
+
+'''
+count yes vs no 
+
+'''
+# BalanceSampling(numpy_df, 50)
+# number_YesOut = (np.where(numpy_df[:,-1] == "yes"))
+# number_NoOut  =  (np.where(numpy_df[:,-1] == "no"))
+# print(np.shape(number_YesOut)) 
+# print(np.shape(number_NoOut))                         
+# print("number yes in validation data",number_YesOut)
+# print("number no in validation data",number_NoOut)
 
 
 # unKnownNumber = np.where(numpy_df[:] == 'unknown')
 # print("Unknown numbers", unKnownNumber)
 
 
+# print("finding how many data is unknown", np.where(numpy_df[:] =='unknown' ))
+
+
 
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
+# df = handle_non_numerical_data(numpy_df)
 
-handle_non_numerical_data(numpy_df,i=0)
+print(handle_non_numerical_data(numpy_df,i=0))
 
-# print(newArrayData[:10])
+print(newArrayData[:10])
 
 newArrayData,validData = BalanceSampling(newArrayData, 255)
 
+# BalanceSampling(newArrayData, 50)
 
 # newArrayData = ageCategorization(newArrayData)
 
@@ -314,11 +389,9 @@ newArrayData = normalizeData2(newArrayData,12) #campaign
 newArrayData = normalizeData2(newArrayData,13) #pdays
 newArrayData = normalizeData2(newArrayData,14) #previous
 newArrayData = normalizeData2(newArrayData,15)
-# newArrayData = normalizeData2(newArrayData,16)
-
-
-pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
-pl.show()
+newArrayData = normalizeData2(newArrayData,16)
+# pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
+# pl.show()
 
 '''
 randomly shuffle data
@@ -329,17 +402,35 @@ newArrayData = ShuffleDataRandomly(newArrayData)
 remove column 8 and column 10 
 '''
 # print(np.shape(newArrayData))
-newData = np.delete(newArrayData,11, axis=1)
+# newData = np.delete(newArrayData,11, axis=1)
 # newData = np.delete(newArrayData,10, axis=1)
-newData = np.delete(newData,9, axis=1)
-newData = np.delete(newData,8, axis=1)
+# newData = np.delete(newData,9, axis=1)
+# newData = np.delete(newData,8, axis=1)
+#
+# print(np.shape(newData))
+# #
+# print(newArrayData[:10])
+
+
+#newArrayData=deleteColum(newArrayData,8)
+#newArrayData=deleteColum(newArrayData,9)
+#newArrayData=deleteColum(newArrayData,10)
+#newArrayData=deleteColum(newArrayData,11)
+
+# newArrayData = normalizeData2(newArrayData)
+# # print("*********************************************")
+
+# newArrayData = ShuffleDataRandomly(newArrayData)
+# # print("*********************************************")
+# # print(shuffledArray[:10])
+#
 
 
 
 sizeTestData = (np.shape(newArrayData)[0])*0.3
 testData, trainingData = seperateData70vs30(newArrayData,sizeTestData)
 
-folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
+folds, diagonalOnes = KFoldcrossValidationData(trainingData,4)
 
 # distrubute__target_values_yes_No(training_data,testing_data)
 
@@ -354,6 +445,9 @@ folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training
 
 # print(np.shape(trainingData)[1])
 # print(np.shape(testData)[1])
+
+
+
 
 for x in diagonalOnes: 
     trainingDatafolds = []
@@ -399,7 +493,7 @@ for x in diagonalOnes:
         
         net.mlptrain(train_in,train_tgt,0.1,100)
         # net.confmat(train_in,train_tgt)
-        # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
+        net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
         net.confmat(testing_in,testing_tgt)    
         # net.confmat(valid_in,valid_tgt)
 
@@ -443,4 +537,3 @@ for x in diagonalOnes:
 # q.mlptrain(xordata[:,0:2],xordata[:,2:3],0.25,5001)
 # q.confmat(xordata[:,0:2],xordata[:,2:3])
 
-#############################################################
