@@ -14,6 +14,7 @@ from numpy import genfromtxt, where, int0
 import csv
 from scipy.optimize import _group_columns
 from matplotlib.pyplot import axis
+import string
     
 filenameIn = "bank-full.csv"
 # filenameTestIn = "bank.csv"
@@ -216,7 +217,7 @@ def BalanceSampling(DataArray, sizeArrayData):
     else:
         noCounter+=1
     
-    while(counter <= sizeArrayData-1): 
+    while(counter <= sizeArrayData-1) and (counter < 10578): 
         row = getRandomRow(DataArray)
         valueYesOrNo = row[:,-1]  
         if valueYesOrNo == 1 and yesCounter <= numberYes:
@@ -277,7 +278,7 @@ handle_non_numerical_data(numpy_df,i=0)
 
 # print(newArrayData[:10])
 
-newArrayData,validData = BalanceSampling(newArrayData, 255)
+newArrayData,validData = BalanceSampling(newArrayData,750)
 
 
 # newArrayData = ageCategorization(newArrayData)
@@ -317,8 +318,8 @@ newArrayData = normalizeData2(newArrayData,15)
 # newArrayData = normalizeData2(newArrayData,16)
 
 
-pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
-pl.show()
+# pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
+# pl.show()
 
 '''
 randomly shuffle data
@@ -376,35 +377,39 @@ for x in diagonalOnes:
     
     Data = np.shape(trainingData)[1]
 
-    # results = np.array([(1,0),(2,0),(5,0),(10,0),(20,0)])
-    results = np.array([1,2,5,8])
+
+    #train and test neural networks with different number of hidden neurons (i)
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
 
     train_in = trainingDatafolds[::,:Data-1]
     train_tgt = trainingDatafolds[::,Data-1:Data]
 
-# print("training target values",train_tgt[:])
 
     testing_in = testData[::,:Data-1]
     testing_tgt = testData[::,Data-1:Data]
     
     valid_in = validationData[::,:Data-1]
     valid_tgt = validationData[::,Data-1:Data]        
+ 
     
-    
-    #train and test neural networks with different number of hidden neurons (i)
              
-    for i in results: 
+    for idx,i in np.ndenumerate(results[:,0]): 
         print("----- "+str(i))
         net = mlp.mlp(train_in,train_tgt,i,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
         
-        net.mlptrain(train_in,train_tgt,0.1,100)
+        # net.mlptrain(train_in,train_tgt,i,100)
         # net.confmat(train_in,train_tgt)
-        # net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
-        net.confmat(testing_in,testing_tgt)    
+        net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
+        percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         # net.confmat(valid_in,valid_tgt)
+        print("******************Percentage accuracy",percentageAccuracy)
+        results[idx,1] = percentageAccuracy
 
-# pl.plot(results[:,0],results[:,1])
-# pl.show()
+#lets plot the first digit in the training set
+pl.plot(results[:,0],results[:,1], label = "logistic")
+pl.show()
+
+
 
 # print(train_in,train_in)
 # print(train_tgt)
