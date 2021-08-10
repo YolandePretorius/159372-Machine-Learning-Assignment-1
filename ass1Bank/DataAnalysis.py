@@ -24,15 +24,6 @@ itemlist = []
 listNumericalData = [0,5,9,11,12,13,14]
 
 
-
-# jobs = ["admin","unknown","unemployed","management","housemaid","entrepreneur","student","blue-collar","self-employed","retired","technician","services"]
-# marital_status = ["married","divorced","single"]
-# education = ["unknown","secondary","primary","tertiary"]
-# has_credit = ["yes","no"]
-
-# print(jobs)
-# read data into df(data frame)
-
 def readDataFromFile(filename):
  
     names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
@@ -40,7 +31,7 @@ def readDataFromFile(filename):
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
         
-    np_df = np.array(np_df[1:])
+    np_df = np.array(np_df[1:1000])
     
     # print("last column", np_df[::,16:17])
     return np_df
@@ -49,16 +40,10 @@ def readDataFromFile(filename):
 def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
     if j in listNumericalData: # if the column is in the list representing the columns with numerical values in the array then add the numerical value other wise add the list indext number
- 
         itemtype = float(item)
         newArrayData[i][j] = itemtype # store the numerical value (index) in the array to replace the string value
     else:
-        newArrayData[i][j] = indextItem
-
-
-def addDataToNUllArray2(i,j,indextItem,item): # i: row number j: column number
-    # print(item.dtype)
-        newArrayData[i][j] = indextItem
+        newArrayData[i][j] = indextItem
 
 '''
 Functions use a dictionary to encode strings of the array into numerical values. Key is the columns of the array [0 to 17] and values are a list of data items per row [0 to 45211] (strings) per column.
@@ -111,8 +96,6 @@ def ageCategorization(newArrayData):
     
 def normalizeData(newArrayData):
     targets = newArrayData[:,11]
-    # newArrayData[:,:15] = newArrayData[:,:15]-newArrayData[:,:15].mean(axis=0)
-    # newArrayData[:,:15] = newArrayData[:,:15]/newArrayData[:,:15].var(axis=0)
     newArrayData = (newArrayData - newArrayData.mean(axis=0))/newArrayData.var(axis=0)
     targets = (targets - targets.mean(axis=0))/targets.var(axis=0)
     # print(targets[10:])
@@ -122,18 +105,10 @@ def normalizeData2(newArrayData,column):
     minValue = np.min( newArrayData[:,column])
     maxValue = np.max( newArrayData[:,column])
     
-    # print(min)
-    # print(max)
     average = (maxValue -minValue)
     newArrayData[:,column] = newArrayData[:,column]-minValue
     newArrayData[:,column] = newArrayData[:,column]/average
-    # targets = newArrayData[:,15]
    
-    # newArrayData[:,column] = newArrayData[:,column]-newArrayData[:,column].mean(axis=0)
-    # newArrayData[:,column] = newArrayData[:,column]/newArrayData[:,column].var(axis=0)
-    # newArrayData = (newArrayData - newArrayData.mean(axis=1))/newArrayData.var(axis=0)
-    # targets = (targets - targets.mean(axis=1))/targets.var(axis=0)
-    # print(newArrayData[10:])
     return newArrayData
 
 def ShuffleDataRandomly(newArrayData):
@@ -141,9 +116,6 @@ def ShuffleDataRandomly(newArrayData):
     order = np.arange(np.shape(newArrayData)[0])
     np.random.shuffle(order)
     newArrayData = newArrayData[order,:]
-    # target = target[order]
-    # target = target[order]
-    # print(target[10:])
     return newArrayData
 
 
@@ -151,39 +123,12 @@ def seperateData70vs30(df,percentageTesting):
     testData, trainingData = BalanceSampling(df,percentageTesting)
     return testData, trainingData 
      
-
-# def handle_non_numerical_data2(df):
-#     columns = df.columns.values
-#
-#     for column in columns:
-#         text_digit_vals = {}
-#         def convert_to_int(val):
-#             return text_digit_vals[val]
-#
-#         if df[column].dtype != np.int64 and df[column].dtype != np.float64:
-#             column_contents = df[column].values.tolist()
-#             unique_elements = set(column_contents)
-#             x = 0
-#             for unique in unique_elements:
-#                 if unique not in text_digit_vals:
-#                     text_digit_vals[unique] = x
-#                     x+=1
-#             df[column] = list(map(convert_to_int, df[column]))
-#
-#     return df        
-    
 def deleteColum(df,column):
-    # print(np.shape(df))
     newData = np.delete(df,column, axis=1)
-    # print(np.shape(newData))
-    # print(deleteColumn7)
     return newData
 
 def deleteRow(df,row):
-    # print(np.shape(df))
     newData = np.delete(df,row, axis=0)
-    # print(np.shape(newData))
-    # print(deleteColumn7)
     return newData
 
 
@@ -192,52 +137,46 @@ def getRandomRow(DataArray):
     row = DataArray[:1]
     return row
     
+
+
 def AddtoArray(NewArrayData,row,row_n):
-    NewArrayData = np.insert(NewArrayData,row_n,[row],axis= 0)
+    if np.shape(NewArrayData)[0]== 0:
+                NewArrayData = row
+    else:
+        NewArrayData = np.append(NewArrayData,row,axis=0)
     return NewArrayData
 
-
    
+
 # create a data set with a 1:1 ratio of yes and no values
 def BalanceSampling(DataArray, sizeArrayData):
     yesCounter = 0 # count the number yes target values is in the newArrayData
     noCounter = 0 #count the number no target values is in the newArrayData
-    counter = 0
+    counter = 0 # make sure the max amount of data rows is not exceeded
     
     ShuffleDataRandomly(DataArray)
-    NewArrayData = np.array(DataArray[:1]) # add the first row of data to the array
-    DataArray = deleteRow(DataArray,0) # Delete row to ensure that the data from original array is not added more than once.
     numberYes = round(sizeArrayData *0.5) #Divide the data 50% maximum number yes values to be added to the array
     numberNo = round(sizeArrayData *0.5) #Divide the data 50% no
-
-    counter += 1
-    valueYesOrNo = NewArrayData[:,-1]   
-    if valueYesOrNo == 1:
-        yesCounter+=1
-    else:
-        noCounter+=1
     
-    while(counter <= sizeArrayData-1) and (counter < 10578): 
+    NewArrayData =[]
+
+
+    while(counter <= np.shape(DataArray)[0]): 
         row = getRandomRow(DataArray)
         valueYesOrNo = row[:,-1]  
         if valueYesOrNo == 1 and yesCounter <= numberYes:
             NewArrayData = AddtoArray(NewArrayData,row,counter)
             DataArray = deleteRow(DataArray,0)
             yesCounter+=1
-            counter+=1
+    
           
         if valueYesOrNo == 0 and noCounter < numberNo:
             NewArrayData = AddtoArray(NewArrayData,row,counter)
             DataArray = deleteRow(DataArray,0)
             noCounter+=1
-            counter+=1     
- 
+         
+        counter+=1
     return  NewArrayData, DataArray  
-
-
-# # def changeDataToNull(df):
-# #     df[np.where(df[:] == "unknown")] = None         
-# #     print(df)
 
 
 # create a array with ones and diagonal values 
@@ -265,8 +204,6 @@ count yes vs no
 # print(np.shape(number_YesOut1)) 
 # print(np.shape(number_NoOut1)) 
 
-
-
 # unKnownNumber = np.where(numpy_df[:] == 'unknown')
 # print("Unknown numbers", unKnownNumber)
 
@@ -276,22 +213,13 @@ newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be use
 
 handle_non_numerical_data(numpy_df,i=0)
 
-# print(newArrayData[:10])
-
-newArrayData,validData = BalanceSampling(newArrayData,750)
 
 
-# newArrayData = ageCategorization(newArrayData)
+'''
+Seperate data in a ballenced smaller data set
 
-# print(np.shape(newArrayData))
-
-# print(newArrayData)
-#
-# print(newArrayData[:15])
-
-# newArrayData = ageCategorization(newArrayData)
-# pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
-# pl.show()
+'''
+newArrayData,validData = BalanceSampling(newArrayData,200)
 
 
 
@@ -342,20 +270,7 @@ testData, trainingData = seperateData70vs30(newArrayData,sizeTestData)
 
 folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
 
-# distrubute__target_values_yes_No(training_data,testing_data)
-
-# print(f"No. of training examples: {training_data.shape[0]}")
-# print(f"No. of testing examples: {testing_data.shape[0]}")
-# print("************************************************************")
-# print(np.shape(trainingData))
-# print("Training Data",trainingData[:])
-# print("TestingData",testData[:])
-# # valuesTraining = np.shape(training_data[0])
-# print("************************************************************")
-
-# print(np.shape(trainingData)[1])
-# print(np.shape(testData)[1])
-
+# use different combinations of k-fold cross validation values 
 for x in diagonalOnes: 
     trainingDatafolds = []
     validationData = []
@@ -395,57 +310,22 @@ for x in diagonalOnes:
              
     for idx,i in np.ndenumerate(results[:,0]): 
         print("----- "+str(i))
-        net = mlp.mlp(train_in,train_tgt,i,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
-        
-        # net.mlptrain(train_in,train_tgt,i,100)
-        # net.confmat(train_in,train_tgt)
-        net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
+        net = mlp.mlp(train_in,train_tgt,i,outtype = 'linear')#different types of out puts: linear, logistic,softmax
+        net.mlptrain(train_in,train_tgt,0.25,101)
+
+        errorEarlyStopping = net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
-        # net.confmat(valid_in,valid_tgt)
-        print("******************Percentage accuracy",percentageAccuracy)
         results[idx,1] = percentageAccuracy
+        weights1 = net.weights1
+        weights2 = net.weights2
+        for item in weights1:
+            print(item)
+    
+    pl.plot(results[:,0],results[:,1], label = "logistic")
+    pl.show()
 
-#lets plot the first digit in the training set
-pl.plot(results[:,0],results[:,1], label = "logistic")
-pl.show()
 
 
+# weights1MLP = mlp.weights2
 
-# print(train_in,train_in)
-# print(train_tgt)
 
-# np.info(where)
-# numpy_df = binary(df)
-# print(numpy_df[:10])
-
-# print(numpy_df[0])
-# unknownvar1 = np.where(numpy_df[:]=="unknown") 
-# print("Unknown1", unknownvar1) 
-# numpy_df = deleteColum(numpy_df,15)
-# numpy_df = deleteColum(numpy_df,8)
-# print(numpy_df[:10])
-#print(numpy_df[0])
-# print("tail",numpy_df[-10:])
-
-# changeDataToNull(numpy_df)
- 
-# unknownvar1 = np.where(numpy_df[:,19]=="unknown") 
-# print("Unknown1",+ unknownvar1) 
-# numpy_df = deleteColum(numpy_df,19)
-# unknownvar2 = np.where(numpy_df[:,19]=="unknown")
-# print(unknownvar2)  
-# numpy_df = deleteColum(numpy_df,7) 
-# # print(np.where(numpy_df[:,18]=="unknown"))
-
-#######################Test If percepetron works###############################################
-
-# anddata = np.array([[0,0,0],[0,1,0],[1,0,0],[1,1,1]])
-# xordata = np.array([[0,0,0],[0,1,1],[1,0,1],[1,1,0]])
-# p = mlp.mlp(anddata[:,0:2],anddata[:,2:3],2)
-# p.mlptrain(anddata[:,0:2],anddata[:,2:3],0.25,1001)
-# p.confmat(anddata[:,0:2],anddata[:,2:3])
-# q = mlp.mlp(xordata[:,0:2],xordata[:,2:3],2)
-# q.mlptrain(xordata[:,0:2],xordata[:,2:3],0.25,5001)
-# q.confmat(xordata[:,0:2],xordata[:,2:3])
-
-#############################################################
