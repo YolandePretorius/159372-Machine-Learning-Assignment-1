@@ -15,9 +15,12 @@ import csv
 from scipy.optimize import _group_columns
 from matplotlib.pyplot import axis
 import string
+
+from numpy import asarray
+from numpy import savetxt
     
 filenameIn = "bank-full.csv"
-# filenameTestIn = "bank.csv"
+# filenameTestIn = "bankData.csv"
 df = 0
 dict = {}
 itemlist = []
@@ -31,11 +34,14 @@ def readDataFromFile(filename):
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
         
-    np_df = np.array(np_df[1:1000])
+    np_df = np.array(np_df[1:])
     
     # print("last column", np_df[::,16:17])
     return np_df
 
+def storeDatainfile(data):
+    savetxt('bankDataAdjusted.csv', data, delimiter=',')
+    
 
 def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
@@ -44,6 +50,14 @@ def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
         newArrayData[i][j] = itemtype # store the numerical value (index) in the array to replace the string value
     else:
         newArrayData[i][j] = indextItem
+
+def findIndext(listDict,item):
+    i = 0
+    for itemInList in listDict:
+        if itemInList == item:
+            return i
+        else:
+            i+=1
 
 '''
 Functions use a dictionary to encode strings of the array into numerical values. Key is the columns of the array [0 to 17] and values are a list of data items per row [0 to 45211] (strings) per column.
@@ -59,20 +73,21 @@ def EncodeData(row,i): # i is the row value
             listDict = dict[j] # get the value (a list) for the key j 
             
             if item in listDict: # if item in list dont add 
-                indextItem = listDict.index(item) # get index where item is in list. The index represents the numerical value of the string
+                indextItem = findIndext(listDict,item) # get index where item is in list. The index represents the numerical value of the string
                 addDataToNUllArray(i,j,indextItem,item)
             else: 
                 listDict.append(item)
-                indextItem = listDict.index(item)
+                indextItem = findIndext(listDict,item)
                 addDataToNUllArray(i,j,indextItem,item)
         else:
             dict[j] = [] # create a list (will be value) for the key value pair
             listDict = dict[j]
             listDict.append(item)
-            indextItem = listDict.index(item)
+            indextItem = findIndext(listDict,item)
+            # indextItem = np.where(listDict[j] == 'item')
             addDataToNUllArray(i,j,indextItem,item)
         j = j +1 # move to next column in the row
-
+        
         
 '''
 Send through the each row of the array containing data to be encoded as a numerical value
@@ -106,10 +121,12 @@ def normalizeData2(newArrayData,column):
     maxValue = np.max( newArrayData[:,column])
     
     average = (maxValue -minValue)
-    newArrayData[:,column] = newArrayData[:,column]-minValue
-    newArrayData[:,column] = newArrayData[:,column]/average
-   
-    return newArrayData
+    if(average == 0):
+        return newArrayData
+    else:
+        newArrayData[:,column] = newArrayData[:,column]-minValue
+        newArrayData[:,column] = newArrayData[:,column]/average
+        return newArrayData
 
 def ShuffleDataRandomly(newArrayData):
     # target = newArrayData[:,-1]
@@ -219,7 +236,7 @@ handle_non_numerical_data(numpy_df,i=0)
 Seperate data in a ballenced smaller data set
 
 '''
-newArrayData,validData = BalanceSampling(newArrayData,200)
+newArrayData,validData = BalanceSampling(newArrayData,10578)
 
 
 
@@ -242,8 +259,8 @@ newArrayData = normalizeData2(newArrayData,11) #duration
 newArrayData = normalizeData2(newArrayData,12) #campaign
 newArrayData = normalizeData2(newArrayData,13) #pdays
 newArrayData = normalizeData2(newArrayData,14) #previous
-newArrayData = normalizeData2(newArrayData,15)
-# newArrayData = normalizeData2(newArrayData,16)
+newArrayData = normalizeData2(newArrayData,15) #poutcome
+newArrayData = normalizeData2(newArrayData,16) # target
 
 
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
@@ -263,10 +280,10 @@ newData = np.delete(newArrayData,11, axis=1)
 newData = np.delete(newData,9, axis=1)
 newData = np.delete(newData,8, axis=1)
 
+storeDatainfile(newData)
 
-
-sizeTestData = (np.shape(newArrayData)[0])*0.3
-testData, trainingData = seperateData70vs30(newArrayData,sizeTestData)
+sizeTestData = (np.shape(newData)[0])*0.3
+testData, trainingData = seperateData70vs30(newData,sizeTestData)
 
 folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
 
@@ -310,16 +327,17 @@ for x in diagonalOnes:
              
     for idx,i in np.ndenumerate(results[:,0]): 
         print("----- "+str(i))
-        net = mlp.mlp(train_in,train_tgt,i,outtype = 'linear')#different types of out puts: linear, logistic,softmax
-        net.mlptrain(train_in,train_tgt,0.25,101)
-
+        net = mlp.mlp(train_in,train_tgt,i,outtype = 'logistic')#different types of out puts: linear, logistic,softmax
+        weights1,weights2 = net.mlptrain(train_in,train_tgt,0.25,101)
+        print("weights 1",weights1)
+        print("weights 2",weights2)
         errorEarlyStopping = net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         results[idx,1] = percentageAccuracy
-        weights1 = net.weights1
-        weights2 = net.weights2
-        for item in weights1:
-            print(item)
+        # weights1,weights2 = net.mlpfwd(inputs)
+        # weights2 = net.weights2
+        # for item in weights1:
+        #     print(item)
     
     pl.plot(results[:,0],results[:,1], label = "logistic")
     pl.show()
