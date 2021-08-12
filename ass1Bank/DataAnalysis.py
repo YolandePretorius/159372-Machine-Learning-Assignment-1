@@ -311,11 +311,11 @@ for x in diagonalOnes:
 
 
     #train and test neural networks with different number of hidden neurons (i)
-    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0)])
 
     train_in = trainingDatafolds[::,:Data-1]
     train_tgt = trainingDatafolds[::,Data-1:Data]
-
+    
 
     testing_in = testData[::,:Data-1]
     testing_tgt = testData[::,Data-1:Data]

@@ -18,13 +18,15 @@ import string
 
 from numpy import asarray
 from numpy import savetxt
+from ass1Bank.DataAnalysis import deleteColum
     
-filenameIn = "bank-full.csv"
+filenameIn = "bank.csv"
 # filenameTestIn = "bank.csv"
 df = 0
 dict = {}
 itemlist = []
 listNumericalData = [0,5,9,11,12,13,14]
+lsitNonNumericalData = [1,2,3,6,7,8,9,10,15]
 
 
 def readDataFromFile(filename):
@@ -40,7 +42,7 @@ def readDataFromFile(filename):
     return np_df
 
 def storeDatainfile(data):
-    savetxt('bankDataAdjusted.csv', data, delimiter=',')
+    savetxt('bankDataAdjusted2.csv', data, delimiter=',')
 
 def addDataToNUllArray(i,j,indextItem,item): # i: row number j: column number
     # print(item.dtype)
@@ -204,35 +206,62 @@ def KFoldcrossValidationData(data,numberfolds):
 
 def NEncoding(maxIndex, currentValue):
     
-    ArrayZero = np.zeros(int(maxIndex));
+    ArrayZero = np.zeros(int(maxIndex)+1);
     ArrayZero[int(currentValue)] = 1
     return ArrayZero
     
-def oneOfNEncodingByColumn(newArrayData,OneOfNEncodingArray):
+def oneOfNEncodingByColumn(newArrayData):
     columns = np.shape(newArrayData)[1]
     rows = np.shape(newArrayData)[0]
-  
-    OneOfNEncodingArrayRow =[]
+    OneOfNEncodingArrayCol =  np.zeros((int(rows),1))
+    OneOfNEncodingArray =  np.zeros((int(rows),1))
+    # ColumnArray = np.array([])
+    # OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
     for c in range(columns-1):
+        
         column = c
-        if c in listNumericalData:
-            OneOfNEncodingArray =  np.append((OneOfNEncodingArray,newArrayData[:,c]), axis=1)
+        if (c in listNumericalData):
+            OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
+            # OneOfNEncodingArrayCol = np.concatenate((OneOfNEncodingArrayCol, newArrayData[:,c]), axis=1)
+            print(np.shape(OneOfNEncodingArrayCol))
+            print(np.shape(OneOfNEncodingArray))
+            OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray,OneOfNEncodingArrayCol), axis=1)
+            # OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
+            # OneOfNEncodingArray[:,c] = newArrayData[:,c]
+            print(np.shape(OneOfNEncodingArrayCol))
+            print(np.shape(OneOfNEncodingArray))
+            # if np.shape(OneOfNEncodingArray)[0]== 0:
+            #     OneOfNEncodingArray =  ColumnArray[:,0]
+            #     shapeArrayA = OneOfNEncodingArray.shape
+            #     OneOfNEncodingArray = shapeArrayA.reshape(-1,1)
+            #     # OneOfNEncodingArray = np.transpose(OneOfNEncodingArray) 
+            
         else:
-            for r in range(rows -1):
-                
+            r=0
+            rownumber = 0
+            maxValue = np.max(newArrayData[:,c])
+            OneOfNEncodingArrayRow =  np.zeros((int(rows),int(maxValue)+1))
+            for r in range(rows -1):              
                 currentValue = newArrayData[r][c]
-                maxValue = np.max(newArrayData[:,c])
                 nArray = NEncoding(maxValue, currentValue)
-                OneOfNEncodingArrayRow = AddtoArray(OneOfNEncodingArrayRow,nArray,r)
+                OneOfNEncodingArrayRow[r,int(currentValue)] = 1
+                # OneOfNEncodingArrayRow = np.insert(OneOfNEncodingArrayRow, rownumber, nArray, axis=0)
+                print(np.shape(OneOfNEncodingArrayRow))
+                # OneOfNEncodingArrayRow[r:] = nArray
                 print()
-
+            rownumber+=1
+            OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray, OneOfNEncodingArrayRow), axis=1)
+            print("SHAPE", np.shape(OneOfNEncodingArray))
+            print(OneOfNEncodingArray[:-20])        
+            
+    return OneOfNEncodingArray
 '''
 ---------------------------------main------------------------------------------------
 '''
 numpy_df = readDataFromFile(filenameIn)
 print(np.shape(numpy_df))
 
-numpy_df = ShuffleDataRandomly(numpy_df)
+# numpy_df = ShuffleDataRandomly(numpy_df)
 
 
 '''
@@ -253,17 +282,22 @@ newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be use
 
 handle_non_numerical_data(numpy_df,i=0)
 
+newArrayData,validData = BalanceSampling(newArrayData,500)
+
 # OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
 #
-OneOfNEncodingArray = ([])
-oneOfNEncodingByColumn(newArrayData,OneOfNEncodingArray)
+# OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
+NewEncodedArray = oneOfNEncodingByColumn(newArrayData)
+# deleteColum(NewEncodedArray,0)
+# deleteColum(NewEncodedArray,1)
 
 
 '''
 Seperate data in a ballenced smaller data set
 
 '''
-newArrayData,validData = BalanceSampling(newArrayData,500)
+# newArrayData,validData = BalanceSampling(newArrayData,500)
+
 
 
 

@@ -16,7 +16,7 @@ from scipy.optimize import _group_columns
 from matplotlib.pyplot import axis
 import string
     
-filenameIn = "bank-full.csv"
+filenameIn = "bankDataAdjusted.csv"
 # filenameTestIn = "bank.csv"
 df = 0
 dict = {}
@@ -29,9 +29,9 @@ def readDataFromFile(filename):
     names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
 
     with open(filename, 'r') as f:
-        np_df = list(csv.reader(f, delimiter=";"))
+        np_df = list(csv.reader(f, delimiter="\n"))
         
-    np_df = np.array(np_df[1:2000])
+    np_df = np.array(np_df[1:])
     
     # print("last column", np_df[::,16:17])
     return np_df
@@ -222,7 +222,7 @@ count yes vs no
 
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
 
-handle_non_numerical_data(numpy_df,i=0)
+# handle_non_numerical_data(numpy_df,i=0)
 
 
 
@@ -230,7 +230,7 @@ handle_non_numerical_data(numpy_df,i=0)
 Seperate data in a ballenced smaller data set
 
 '''
-newArrayData,validData = BalanceSampling(newArrayData,500)
+# newArrayData,validData = BalanceSampling(newArrayData,500)
 
 
 
@@ -238,23 +238,23 @@ newArrayData,validData = BalanceSampling(newArrayData,500)
 '''
 normalizing data using min and max
 '''
-newArrayData = normalizeData2(newArrayData,0) # age
-newArrayData = normalizeData2(newArrayData,1) #job
-newArrayData = normalizeData2(newArrayData,2) #marital
-newArrayData = normalizeData2(newArrayData,3) #education
-newArrayData = normalizeData2(newArrayData,4) #default
-newArrayData = normalizeData2(newArrayData,5) #balance
-newArrayData = normalizeData2(newArrayData,6) #housing
-newArrayData = normalizeData2(newArrayData,7) #loan
-newArrayData = normalizeData2(newArrayData,8) #contact
-newArrayData = normalizeData2(newArrayData,9) #day
-newArrayData = normalizeData2(newArrayData,10) #month
-newArrayData = normalizeData2(newArrayData,11) #duration
-newArrayData = normalizeData2(newArrayData,12) #campaign
-newArrayData = normalizeData2(newArrayData,13) #pdays
-newArrayData = normalizeData2(newArrayData,14) #previous
-newArrayData = normalizeData2(newArrayData,15) #poutcome
-newArrayData = normalizeData2(newArrayData,16) # target
+# newArrayData = normalizeData2(newArrayData,0) # age
+# newArrayData = normalizeData2(newArrayData,1) #job
+# newArrayData = normalizeData2(newArrayData,2) #marital
+# newArrayData = normalizeData2(newArrayData,3) #education
+# newArrayData = normalizeData2(newArrayData,4) #default
+# newArrayData = normalizeData2(newArrayData,5) #balance
+# newArrayData = normalizeData2(newArrayData,6) #housing
+# newArrayData = normalizeData2(newArrayData,7) #loan
+# newArrayData = normalizeData2(newArrayData,8) #contact
+# newArrayData = normalizeData2(newArrayData,9) #day
+# newArrayData = normalizeData2(newArrayData,10) #month
+# newArrayData = normalizeData2(newArrayData,11) #duration
+# newArrayData = normalizeData2(newArrayData,12) #campaign
+# newArrayData = normalizeData2(newArrayData,13) #pdays
+# newArrayData = normalizeData2(newArrayData,14) #previous
+# newArrayData = normalizeData2(newArrayData,15) #poutcome
+# newArrayData = normalizeData2(newArrayData,16) # target
 
 
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
@@ -263,16 +263,16 @@ newArrayData = normalizeData2(newArrayData,16) # target
 '''
 randomly shuffle data
 '''
-newArrayData = ShuffleDataRandomly(newArrayData)
+# newArrayData = ShuffleDataRandomly(newArrayData)
 
 '''
 remove column 8 and column 10 
 '''
-# print(np.shape(newArrayData))
-newData = np.delete(newArrayData,11, axis=1)
-# newData = np.delete(newArrayData,10, axis=1)
-newData = np.delete(newData,9, axis=1)
-newData = np.delete(newData,8, axis=1)
+# # print(np.shape(newArrayData))
+# newData = np.delete(newArrayData,11, axis=1)
+# # newData = np.delete(newArrayData,10, axis=1)
+# newData = np.delete(newData,9, axis=1)
+# newData = np.delete(newData,8, axis=1)
 
 
 
@@ -305,7 +305,7 @@ for x in diagonalOnes:
 
 
     #train and test neural networks with different number of hidden neurons (i)
-    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0)])
 
     train_in = trainingDatafolds[::,:Data-1]
     train_tgt = trainingDatafolds[::,Data-1:Data]
