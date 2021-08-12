@@ -291,7 +291,7 @@ newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be use
 
 handle_non_numerical_data(numpy_df,i=0)
 
-newArrayDataBalanced,validData = BalanceSampling(newArrayData,1000)
+newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
 
 # newArrayData,validData = BalanceSampling(newArrayData,1000)
 
@@ -392,7 +392,7 @@ for x in diagonalOnes:
     testDataRow = np.shape(testData)[0]
 
     #train and test neural networks with different number of hidden neurons (i)
-    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0)])
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
 
     train_in = trainingDatafolds[::,:TrainingDataCol-1]
     train_tgt = trainingDatafolds[::,TrainingDataCol-1:TrainingDataCol]
