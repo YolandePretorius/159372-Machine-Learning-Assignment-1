@@ -18,7 +18,7 @@ import string
 
 from numpy import asarray
 from numpy import savetxt
-from ass1Bank.DataAnalysis import deleteColum
+# from ass1Bank.DataAnalysis import deleteColum
     
 filenameIn = "bank.csv"
 # filenameTestIn = "bank.csv"
@@ -36,7 +36,7 @@ def readDataFromFile(filename):
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
         
-    np_df = np.array(np_df[1:2000])
+    np_df = np.array(np_df[1:])
     
     # print("last column", np_df[::,16:17])
     return np_df
@@ -212,17 +212,21 @@ def NEncoding(maxIndex, currentValue):
     
 def oneOfNEncodingByColumn(newArrayData):
     columns = np.shape(newArrayData)[1]
-    rows = np.shape(newArrayData)[0]
-    OneOfNEncodingArrayCol =  np.zeros((int(rows),1))
+    rows = (np.shape(newArrayData)[0])
+    
+    # OneOfNEncodingArrayCol =  np.zeros((int(rows),1))
     OneOfNEncodingArray =  np.zeros((int(rows),1))
+    # OneOfNEncodingtarget = np.zeros((int(rows),1))
     # ColumnArray = np.array([])
     # OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
-    for c in range(columns-1):
+    for c in range(columns):
         
-        column = c
-        if (c in listNumericalData):
+   
+        if (c in listNumericalData) or (c == columns-1):
+            OneOfNEncodingArrayCol =  np.zeros((int(rows),1))
             OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
             # OneOfNEncodingArrayCol = np.concatenate((OneOfNEncodingArrayCol, newArrayData[:,c]), axis=1)
+            OneOfNEncodingArrayCol = np.delete(OneOfNEncodingArrayCol,0, axis=1)
             print(np.shape(OneOfNEncodingArrayCol))
             print(np.shape(OneOfNEncodingArray))
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray,OneOfNEncodingArrayCol), axis=1)
@@ -241,20 +245,24 @@ def oneOfNEncodingByColumn(newArrayData):
             rownumber = 0
             maxValue = np.max(newArrayData[:,c])
             OneOfNEncodingArrayRow =  np.zeros((int(rows),int(maxValue)+1))
-            for r in range(rows -1):              
+            for r in range(rows-1):              
                 currentValue = newArrayData[r][c]
-                nArray = NEncoding(maxValue, currentValue)
+                # nArray = NEncoding(maxValue, currentValue)
                 OneOfNEncodingArrayRow[r,int(currentValue)] = 1
                 # OneOfNEncodingArrayRow = np.insert(OneOfNEncodingArrayRow, rownumber, nArray, axis=0)
                 print(np.shape(OneOfNEncodingArrayRow))
                 # OneOfNEncodingArrayRow[r:] = nArray
                 print()
             rownumber+=1
+            # if (c == columns-1):
+            #     OneOfNEncodingtarget = np.concatenate((OneOfNEncodingtarget, OneOfNEncodingArrayRow), axis=1)
+            # else:
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray, OneOfNEncodingArrayRow), axis=1)
             print("SHAPE", np.shape(OneOfNEncodingArray))
             print(OneOfNEncodingArray[:-20])        
-            
-    return OneOfNEncodingArray
+    OneOfNEncodingArray = np.delete(OneOfNEncodingArray,0, axis=1)  
+    # OneOfNEncodingtarget = np.delete(OneOfNEncodingtarget,0, axis=1)       
+    return OneOfNEncodingArray 
 '''
 ---------------------------------main------------------------------------------------
 '''
@@ -275,22 +283,21 @@ count yes vs no
 
 # unKnownNumber = np.where(numpy_df[:] == 'unknown')
 # print("Unknown numbers", unKnownNumber)
+# newArrayData = np.zeros(np.shape(numpy_df)) #create zero array that will be used to hold the numerical values created for the strings
 
-
+# newArrayDataBalanced,validData = BalanceSampling(numpy_df,1000)
 
 newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
 
 handle_non_numerical_data(numpy_df,i=0)
 
-newArrayData,validData = BalanceSampling(newArrayData,500)
+newArrayDataBalanced,validData = BalanceSampling(newArrayData,1000)
+
+# newArrayData,validData = BalanceSampling(newArrayData,1000)
 
 # OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
 #
 # OneOfNEncodingArray = np.zeros(np.shape(numpy_df))
-NewEncodedArray = oneOfNEncodingByColumn(newArrayData)
-# deleteColum(NewEncodedArray,0)
-# deleteColum(NewEncodedArray,1)
-
 
 '''
 Seperate data in a ballenced smaller data set
@@ -306,22 +313,22 @@ Seperate data in a ballenced smaller data set
 normalizing data using min and max
 '''
 newArrayData = normalizeData2(newArrayData,0) # age
-newArrayData = normalizeData2(newArrayData,1) #job
-newArrayData = normalizeData2(newArrayData,2) #marital
-newArrayData = normalizeData2(newArrayData,3) #education
-newArrayData = normalizeData2(newArrayData,4) #default
+# newArrayData = normalizeData2(newArrayData,1) #job
+# newArrayData = normalizeData2(newArrayData,2) #marital
+# newArrayData = normalizeData2(newArrayData,3) #education
+# newArrayData = normalizeData2(newArrayData,4) #default
 newArrayData = normalizeData2(newArrayData,5) #balance
-newArrayData = normalizeData2(newArrayData,6) #housing
-newArrayData = normalizeData2(newArrayData,7) #loan
-newArrayData = normalizeData2(newArrayData,8) #contact
-newArrayData = normalizeData2(newArrayData,9) #day
-newArrayData = normalizeData2(newArrayData,10) #month
+# newArrayData = normalizeData2(newArrayData,6) #housing
+# newArrayData = normalizeData2(newArrayData,7) #loan
+# newArrayData = normalizeData2(newArrayData,8) #contact
+# newArrayData = normalizeData2(newArrayData,9) #day
+# newArrayData = normalizeData2(newArrayData,10) #month
 newArrayData = normalizeData2(newArrayData,11) #duration
 newArrayData = normalizeData2(newArrayData,12) #campaign
 newArrayData = normalizeData2(newArrayData,13) #pdays
 newArrayData = normalizeData2(newArrayData,14) #previous
-newArrayData = normalizeData2(newArrayData,15) #poutcome
-newArrayData = normalizeData2(newArrayData,16) # target
+# newArrayData = normalizeData2(newArrayData,15) #poutcome
+# newArrayData = normalizeData2(newArrayData,16) # target
 
 
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
@@ -341,7 +348,99 @@ newData = np.delete(newArrayData,11, axis=1)
 newData = np.delete(newData,9, axis=1)
 newData = np.delete(newData,8, axis=1)
 
+NewEncodedArray = oneOfNEncodingByColumn(newData)
+# deleteColum(NewEncodedArray,0)
+# deleteColum(NewEncodedArray,1)
+
+
+
 # storeDatainfile(newData)
+
+
+sizeTestData = (np.shape(NewEncodedArray)[0])*0.3
+testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
+
+folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
+
+# use different combinations of k-fold cross validation values 
+for x in diagonalOnes: 
+    trainingDatafolds = []
+    validationData = []
+    for y in x:
+        y =int(y)
+        if y == 0: # if the diagonal value in the diagonalOnes data set is 0, it is  added to the training data dividing data as 1 part validation data and (n-1) part training data  
+            if np.shape(trainingDatafolds)[0]== 0:
+                trainingDatafolds = folds[y]
+    
+            else:
+                # trainingDatafolds = np.append(folds[y])   
+            
+                trainingDatafolds = np.append(trainingDatafolds,folds[y],axis=0)
+               
+        else: # if the diagonal value in the diagonalOnes data set is 1, it is  set as the validation data 
+            validationData  = folds[y]
+            
+            
+    
+    TrainingDataCol = np.shape(trainingDatafolds)[1]
+    TrainingDataColDataRow = np.shape(trainingDatafolds)[0]
+    
+    validationDataCol = np.shape(validationData)[1]
+    validationDataRow = np.shape(validationData)[0]
+    
+    testDataCol = np.shape(testData)[1]
+    testDataRow = np.shape(testData)[0]
+
+    #train and test neural networks with different number of hidden neurons (i)
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0)])
+
+    train_in = trainingDatafolds[::,:TrainingDataCol-1]
+    train_tgt = trainingDatafolds[::,TrainingDataCol-1:TrainingDataCol]
+    
+    i = 0
+    train_tgtZero = np.zeros((TrainingDataColDataRow,2))
+    for i in range(TrainingDataColDataRow):
+        col = int(train_tgt[i][0])
+        train_tgtZero[i][col] = 1
+  
+    print(train_tgtZero[-20:])
+    
+    testing_in = testData[::,:testDataCol-1]
+    testing_tgt = testData[::,testDataCol-1:testDataCol]
+    
+    test_tgtZero = np.zeros((testDataRow,2))
+    for i in range(testDataRow):
+        col = int(testing_tgt[i][0])
+        test_tgtZero[i][col] = 1
+    
+    valid_in = validationData[::,:validationDataCol-1]
+    valid_tgt = validationData[::,validationDataCol-1:validationDataCol] 
+    
+    valid_tgtZero = np.zeros((validationDataRow,2))
+    for i in range(validationDataRow):
+        col = int(valid_tgt[i][0])
+        valid_tgtZero[i][col] = 1      
+ 
+    print('--------------------------------------------------')
+    
+             
+    for idx,i in np.ndenumerate(results[:,0]): 
+        print("----- "+str(i))
+        net = mlp.mlp(train_in,train_tgtZero,i,outtype = 'softmax')#different types of out puts: linear, logistic,softmax
+        # weights1,weights2 = net.mlptrain(train_in,train_tgt,0.25,101)
+        # print("weights 1",weights1)
+        # print("weights 2",weights2)
+        net.mlptrain(train_in,train_tgtZero,0.25,101)
+        errorEarlyStopping = net.earlystopping(train_in,train_tgtZero,valid_in,valid_tgtZero,0.1) 
+        percentageAccuracy = net.confmat(testing_in,test_tgtZero)    
+        results[idx,1] = percentageAccuracy
+        # weights1,weights2 = net.mlpfwd(inputs)
+        # weights2 = net.weights2
+        # for item in weights1:
+        #     print(item)
+    
+    pl.plot(results[:,0],results[:,1])
+    pl.show()
 
 
 
