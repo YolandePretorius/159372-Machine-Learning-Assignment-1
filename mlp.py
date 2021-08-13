@@ -25,7 +25,8 @@ class mlp:
         self.beta = beta
         self.momentum = momentum
         self.outtype = outtype
-    
+        # self.weights1 = weights1
+        # self.weights2 = weights2
         # Initialise network
         self.weights1 = (np.random.rand(self.nin+1,self.nhidden)-0.5)*2/np.sqrt(self.nin)
         self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
@@ -85,7 +86,7 @@ class mlp:
             updatew2 = eta*(np.dot(np.transpose(self.hidden),deltao)) + self.momentum*updatew2
             self.weights1 -= updatew1
             self.weights2 -= updatew2
-        return self.weights1,self.weights2            
+        return error           
             # Randomise order of inputs (not necessary for matrix-based calculation)
             #np.random.shuffle(change)
             #inputs = inputs[change,:]

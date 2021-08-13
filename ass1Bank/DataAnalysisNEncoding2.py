@@ -369,25 +369,73 @@ storeDatainfile(NewEncodedArray)
 sizeTestData = (np.shape(NewEncodedArray)[0])*0.3
 testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
 
-# folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
+folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
 
 # use different combinations of k-fold cross validation values 
-############################################################################
-results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
+for x in diagonalOnes: 
+    trainingDatafolds = []
+    validationData = []
+    for y in x:
+        y =int(y)
+        if y == 0: # if the diagonal value in the diagonalOnes data set is 0, it is  added to the training data dividing data as 1 part validation data and (n-1) part training data  
+            if np.shape(trainingDatafolds)[0]== 0:
+                trainingDatafolds = folds[y]
+    
+            else:
+                # trainingDatafolds = np.append(folds[y])   
+            
+                trainingDatafolds = np.append(trainingDatafolds,folds[y],axis=0)
+               
+        else: # if the diagonal value in the diagonalOnes data set is 1, it is  set as the validation data 
+            validationData  = folds[y]
+            
+            
+    
+    TrainingDataCol = np.shape(trainingDatafolds)[1]
+    TrainingDataColDataRow = np.shape(trainingDatafolds)[0]
+    
+    validationDataCol = np.shape(validationData)[1]
+    validationDataRow = np.shape(validationData)[0]
+    
+    testDataCol = np.shape(testData)[1]
+    testDataRow = np.shape(testData)[0]
 
-testDataCol = np.shape(testData)[1]
-testDataRow = np.shape(testData)[0]
-TrainingDataCol = np.shape(trainingData)[1]
-TrainingDataColDataRow = np.shape(trainingData)[0]
+    #train and test neural networks with different number of hidden neurons (i)
+    results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
 
+    train_in = trainingDatafolds[::,:TrainingDataCol-2]
+    traint_gt = trainingDatafolds[::,TrainingDataCol-2:TrainingDataCol]
+    
+    # i = 0
+    # train_tgtZero = np.zeros((TrainingDataColDataRow,2))
+    # for i in range(TrainingDataColDataRow):
+    #     col = int(train_tgt[i][0])
+    #     train_tgtZero[i][col] = 1
+    #
+    # print(train_tgtZero[-20:])
+    #
 
-testing_in = testData[::,:testDataCol-2]
-testing_tgt = testData[::,testDataCol-2:testDataCol]
-train_in = trainingData[::,:TrainingDataCol-2]
-traint_gt = trainingData[::,TrainingDataCol-2:TrainingDataCol]
+    testing_in = testData[::,:testDataCol-2]
+    testing_tgt = testData[::,testDataCol-2:testDataCol]
+    
+    # test_tgtZero = np.zeros((testDataRow,2))
+    # for i in range(testDataRow):
+    #     col = int(testing_tgt[i][0])
+    #     test_tgtZero[i][col] = 1
+    #
 
+    valid_in = validationData[::,:validationDataCol-2]
+    valid_tgt = validationData[::,validationDataCol-2:validationDataCol] 
+    
+    # valid_tgtZero = np.zeros((validationDataRow,2))
+    # for i in range(validationDataRow):
+    #     col = int(valid_tgt[i][0])
+    #     valid_tgtZero[i][col] = 1      
+    #
 
-for idx,i in np.ndenumerate(results[:,0]): 
+    print('--------------------------------------------------')
+                
+    for idx,i in np.ndenumerate(results[:,0]): 
         print("----- "+str(i))
         # print(np.shape(net.weights1))
         # print(np.shape(net.weights2))
@@ -395,18 +443,18 @@ for idx,i in np.ndenumerate(results[:,0]):
         # weights2 = 0
         #
 
-        # nin = np.shape(train_in)[1]
-        # nout = np.shape(traint_gt)[1]
-        #
-        # weights1 = (np.random.rand(nin+1,i)-0.5)*2/np.sqrt(nin)
-        # weights2 = (np.random.rand(i+1,nout)-0.5)*2/np.sqrt(i)
-
-        net = mlp.mlp(train_in,traint_gt,i,outtype = 'softmax')#different types of out puts: linear, logistic,softmax
+        nin = np.shape(train_in)[1]
+        nout = np.shape(traint_gt)[1]
+        
+        weights1 = (np.random.rand(nin+1,i)-0.5)*2/np.sqrt(nin)
+        weights2 = (np.random.rand(i+1,nout)-0.5)*2/np.sqrt(i)
+        
+        net = mlp.mlp(train_in,traint_gt,i,outtype = 'softmax',weights1,weights2)#different types of out puts: linear, logistic,softmax
         # weights1,weights2 = net.mlptrain(train_in,train_tgt,0.25,101)
         # print("weights 1",weights1)
         # print("weights 2",weights2)
         error = net.mlptrain(train_in,traint_gt,0.25,101)
-        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,train_in,traint_gt,0.1) 
+        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,valid_in,valid_tgt,0.1) 
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         results[idx,1] = percentageAccuracy
         # weights1,weights2 = net.mlpfwd(inputs)
@@ -415,116 +463,10 @@ for idx,i in np.ndenumerate(results[:,0]):
         #     print(item)
         print(np.shape(net.weights1))
         print(np.shape(net.weights2))
-
+        
 
         pl.plot(results[:,0],results[:,1])
         pl.show()
-
-
-
-
-
-
-
-############################################################################
-
-
-# for x in diagonalOnes: 
-#     trainingDatafolds = []
-#     validationData = []
-#     for y in x:
-#         y =int(y)
-#         if y == 0: # if the diagonal value in the diagonalOnes data set is 0, it is  added to the training data dividing data as 1 part validation data and (n-1) part training data  
-#             if np.shape(trainingDatafolds)[0]== 0:
-#                 trainingDatafolds = folds[y]
-#
-#             else:
-#                 # trainingDatafolds = np.append(folds[y])   
-#
-#                 trainingDatafolds = np.append(trainingDatafolds,folds[y],axis=0)
-#
-#         else: # if the diagonal value in the diagonalOnes data set is 1, it is  set as the validation data 
-#             validationData  = folds[y]
-#
-#
-#
-#     TrainingDataCol = np.shape(trainingDatafolds)[1]
-#     TrainingDataColDataRow = np.shape(trainingDatafolds)[0]
-#
-#     validationDataCol = np.shape(validationData)[1]
-#     validationDataRow = np.shape(validationData)[0]
-#
-#     testDataCol = np.shape(testData)[1]
-#     testDataRow = np.shape(testData)[0]
-#
-#     #train and test neural networks with different number of hidden neurons (i)
-#     results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
-#
-#     train_in = trainingDatafolds[::,:TrainingDataCol-2]
-#     traint_gt = trainingDatafolds[::,TrainingDataCol-2:TrainingDataCol]
-#
-#     # i = 0
-#     # train_tgtZero = np.zeros((TrainingDataColDataRow,2))
-#     # for i in range(TrainingDataColDataRow):
-#     #     col = int(train_tgt[i][0])
-#     #     train_tgtZero[i][col] = 1
-#     #
-#     # print(train_tgtZero[-20:])
-#     #
-#
-#     testing_in = testData[::,:testDataCol-2]
-#     testing_tgt = testData[::,testDataCol-2:testDataCol]
-#
-#     # test_tgtZero = np.zeros((testDataRow,2))
-#     # for i in range(testDataRow):
-#     #     col = int(testing_tgt[i][0])
-#     #     test_tgtZero[i][col] = 1
-#     #
-#
-#     valid_in = validationData[::,:validationDataCol-2]
-#     valid_tgt = validationData[::,validationDataCol-2:validationDataCol] 
-#
-#     # valid_tgtZero = np.zeros((validationDataRow,2))
-#     # for i in range(validationDataRow):
-#     #     col = int(valid_tgt[i][0])
-#     #     valid_tgtZero[i][col] = 1      
-#     #
-#
-#     print('--------------------------------------------------')
-#
-#     for idx,i in np.ndenumerate(results[:,0]): 
-#         print("----- "+str(i))
-#         # print(np.shape(net.weights1))
-#         # print(np.shape(net.weights2))
-#         # weights1 = 0
-#         # weights2 = 0
-#         #
-#
-#         nin = np.shape(train_in)[1]
-#         nout = np.shape(traint_gt)[1]
-#
-#         weights1 = (np.random.rand(nin+1,i)-0.5)*2/np.sqrt(nin)
-#         weights2 = (np.random.rand(i+1,nout)-0.5)*2/np.sqrt(i)
-#
-#         net = mlp.mlp(train_in,traint_gt,i,outtype = 'softmax',weights1,weights2)#different types of out puts: linear, logistic,softmax
-#         # weights1,weights2 = net.mlptrain(train_in,train_tgt,0.25,101)
-#         # print("weights 1",weights1)
-#         # print("weights 2",weights2)
-#         error = net.mlptrain(train_in,traint_gt,0.25,101)
-#         errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,valid_in,valid_tgt,0.1) 
-#         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
-#         results[idx,1] = percentageAccuracy
-#         # weights1,weights2 = net.mlpfwd(inputs)
-#         # weights2 = net.weights2
-#         # for item in weights1:
-#         #     print(item)
-#         print(np.shape(net.weights1))
-#         print(np.shape(net.weights2))
-#
-#
-#         pl.plot(results[:,0],results[:,1])
-#         pl.show()
-#
 
 
 
