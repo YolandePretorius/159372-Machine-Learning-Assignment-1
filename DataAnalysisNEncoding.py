@@ -380,7 +380,7 @@ def runMLP():
     
     # use different combinations of k-fold cross validation values 
     ############################################################################
-    results = np.array([(1,0)])
+    results = np.array([(15,0)])
     
     testDataCol = np.shape(testData)[1]
     testDataRow = np.shape(testData)[0]
@@ -429,7 +429,7 @@ def runMLP():
     pl.show()
 
 
-runMLP()
+# runMLP()
 
 
 

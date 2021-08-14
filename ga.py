@@ -15,7 +15,7 @@ import random
 import pylab as pl
 import numpy as np
 # import fourpeaks as fF
-import billsfit as bf
+import mlpfit as mlpf
 
 
 class ga:
@@ -44,7 +44,7 @@ class ga:
 		self.tournment = tournament
 
 		self.population = np.random.rand(self.populationSize,self.stringLength)
-		self.population = np.where(self.population<0.5,0,1)
+  # self.population = np.where(self.population<0.5,0,1)
 		
 	def runGA(self):
 		"""The basic loop"""
