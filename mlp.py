@@ -30,8 +30,8 @@ class mlp:
         # Initialise network
         self.weights1 = (np.random.rand(self.nin+1,self.nhidden)-0.5)*2/np.sqrt(self.nin)
         self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
-        print(self.weights1)
-        print(self.weights2)
+        # print(self.weights1)
+        # print(self.weights2)
     def earlystopping(self,inputs,targets,valid,validtargets,eta,niterations=100):
     
         valid = np.concatenate((valid,-np.ones((np.shape(valid)[0],1))),axis=1)
@@ -43,7 +43,7 @@ class mlp:
         count = 0
         while (((old_val_error1 - new_val_error) > 0.001) or ((old_val_error2 - old_val_error1)>0.001)):
             count+=1
-            print(count)
+            # print(count)
             self.mlptrain(inputs,targets,eta,niterations)
             old_val_error2 = old_val_error1
             old_val_error1 = new_val_error
@@ -67,8 +67,8 @@ class mlp:
             self.outputs = self.mlpfwd(inputs)
 
             error = 0.5*np.sum((self.outputs-targets)**2)
-            if (np.mod(n,100)==0):
-                print ("Iteration: ",n, " Error: ",error)
+            # if (np.mod(n,100)==0):
+                # print ("Iteration: ",n, " Error: ",error)
 
             # Different types of output neurons
             if self.outtype == 'linear':
@@ -80,6 +80,7 @@ class mlp:
             else:
                 print("error")
             
+
             deltah = self.hidden*self.beta*(1.0-self.hidden)*(np.dot(deltao,np.transpose(self.weights2)))
                       
             updatew1 = eta*(np.dot(np.transpose(inputs),deltah[:,:-1])) + self.momentum*updatew1

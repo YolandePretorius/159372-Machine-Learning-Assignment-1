@@ -15,11 +15,11 @@ import random
 import pylab as pl
 import numpy as np
 # import fourpeaks as fF
-# import billsfit as bF
+import billsfit as bF
 
 class ga:
 
-	def __init__(self,stringLength,fitnessFunction,nEpochs,populationSize=100,mutationProb=-1,crossover='sp',nElite=4,tournament=False):
+	def __init__(self,stringLength,fitnessFunction,nEpochs,populationSize=100,mutationProb=-1,crossover='sp',nElite=4,tournament=False): #crossover can also be un
 		""" Constructor"""
 		self.stringLength = stringLength
 		

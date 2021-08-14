@@ -227,13 +227,13 @@ def oneOfNEncodingByColumn(newArrayData):
             OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
             # OneOfNEncodingArrayCol = np.concatenate((OneOfNEncodingArrayCol, newArrayData[:,c]), axis=1)
             OneOfNEncodingArrayCol = np.delete(OneOfNEncodingArrayCol,0, axis=1)
-            print(np.shape(OneOfNEncodingArrayCol))
-            print(np.shape(OneOfNEncodingArray))
+            # print(np.shape(OneOfNEncodingArrayCol))
+            # print(np.shape(OneOfNEncodingArray))
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray,OneOfNEncodingArrayCol), axis=1)
             # OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
             # OneOfNEncodingArray[:,c] = newArrayData[:,c]
-            print(np.shape(OneOfNEncodingArrayCol))
-            print(np.shape(OneOfNEncodingArray))
+            # print(np.shape(OneOfNEncodingArrayCol))
+            # print(np.shape(OneOfNEncodingArray))
             # if np.shape(OneOfNEncodingArray)[0]== 0:
             #     OneOfNEncodingArray =  ColumnArray[:,0]
             #     shapeArrayA = OneOfNEncodingArray.shape
@@ -250,16 +250,16 @@ def oneOfNEncodingByColumn(newArrayData):
                 # nArray = NEncoding(maxValue, currentValue)
                 OneOfNEncodingArrayRow[r,int(currentValue)] = 1
                 # OneOfNEncodingArrayRow = np.insert(OneOfNEncodingArrayRow, rownumber, nArray, axis=0)
-                print(np.shape(OneOfNEncodingArrayRow))
+                # print(np.shape(OneOfNEncodingArrayRow))
                 # OneOfNEncodingArrayRow[r:] = nArray
-                print()
+                # print()
             rownumber+=1
             # if (c == columns-1):
             #     OneOfNEncodingtarget = np.concatenate((OneOfNEncodingtarget, OneOfNEncodingArrayRow), axis=1)
             # else:
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray, OneOfNEncodingArrayRow), axis=1)
-            print("SHAPE", np.shape(OneOfNEncodingArray))
-            print(OneOfNEncodingArray[:-20])        
+            # print("SHAPE", np.shape(OneOfNEncodingArray))
+            # print(OneOfNEncodingArray[:-20])        
     OneOfNEncodingArray = np.delete(OneOfNEncodingArray,0, axis=1)  
     # OneOfNEncodingtarget = np.delete(OneOfNEncodingtarget,0, axis=1)       
     return OneOfNEncodingArray 
@@ -267,7 +267,7 @@ def oneOfNEncodingByColumn(newArrayData):
 ---------------------------------main------------------------------------------------
 '''
 numpy_df = readDataFromFile(filenameIn)
-print(np.shape(numpy_df))
+# print(np.shape(numpy_df))
 
 # numpy_df = ShuffleDataRandomly(numpy_df)
 
@@ -354,7 +354,7 @@ newData = np.delete(newData,10, axis=1)
 newData = np.delete(newData,9, axis=1)
 newData = np.delete(newData,8, axis=1)
 
-print(np.shape(newData))
+# print(np.shape(newData))
 
 NumAfterDeletingColumns = [0,5,8,9,10]
 
@@ -373,7 +373,7 @@ testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
 
 # use different combinations of k-fold cross validation values 
 ############################################################################
-results = np.array([(1,0),(2,0),(4,0),(6,0),(7,0),(8,0),(9,0),(10,0),(15,0),(20,0)])
+results = np.array([(0,0),(1,0),(2,0)])
 
 testDataCol = np.shape(testData)[1]
 testDataRow = np.shape(testData)[0]
@@ -387,8 +387,9 @@ train_in = trainingData[::,:TrainingDataCol-2]
 traint_gt = trainingData[::,TrainingDataCol-2:TrainingDataCol]
 
 
-for idx,i in np.ndenumerate(results[:,0]): 
-        print("----- "+str(i))
+for idx,i in np.ndenumerate(results[:,0]):
+     
+        # print("----- "+str(i))
         # print(np.shape(net.weights1))
         # print(np.shape(net.weights2))
         # weights1 = 0
@@ -417,8 +418,8 @@ for idx,i in np.ndenumerate(results[:,0]):
         print(np.shape(net.weights2))
 
 
-        pl.plot(results[:,0],results[:,1])
-        pl.show()
+pl.plot(results[:,0],results[:,1])
+pl.show()
 
 
 

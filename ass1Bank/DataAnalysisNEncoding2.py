@@ -227,13 +227,13 @@ def oneOfNEncodingByColumn(newArrayData):
             OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
             # OneOfNEncodingArrayCol = np.concatenate((OneOfNEncodingArrayCol, newArrayData[:,c]), axis=1)
             OneOfNEncodingArrayCol = np.delete(OneOfNEncodingArrayCol,0, axis=1)
-            print(np.shape(OneOfNEncodingArrayCol))
-            print(np.shape(OneOfNEncodingArray))
+            # print(np.shape(OneOfNEncodingArrayCol))
+            # print(np.shape(OneOfNEncodingArray))
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray,OneOfNEncodingArrayCol), axis=1)
             # OneOfNEncodingArrayCol =np.insert(OneOfNEncodingArrayCol, 1, newArrayData[:,c], axis=1)
             # OneOfNEncodingArray[:,c] = newArrayData[:,c]
-            print(np.shape(OneOfNEncodingArrayCol))
-            print(np.shape(OneOfNEncodingArray))
+            # print(np.shape(OneOfNEncodingArrayCol))
+            # print(np.shape(OneOfNEncodingArray))
             # if np.shape(OneOfNEncodingArray)[0]== 0:
             #     OneOfNEncodingArray =  ColumnArray[:,0]
             #     shapeArrayA = OneOfNEncodingArray.shape
@@ -250,16 +250,16 @@ def oneOfNEncodingByColumn(newArrayData):
                 # nArray = NEncoding(maxValue, currentValue)
                 OneOfNEncodingArrayRow[r,int(currentValue)] = 1
                 # OneOfNEncodingArrayRow = np.insert(OneOfNEncodingArrayRow, rownumber, nArray, axis=0)
-                print(np.shape(OneOfNEncodingArrayRow))
+                # print(np.shape(OneOfNEncodingArrayRow))
                 # OneOfNEncodingArrayRow[r:] = nArray
-                print()
+                # print()
             rownumber+=1
             # if (c == columns-1):
             #     OneOfNEncodingtarget = np.concatenate((OneOfNEncodingtarget, OneOfNEncodingArrayRow), axis=1)
             # else:
             OneOfNEncodingArray = np.concatenate((OneOfNEncodingArray, OneOfNEncodingArrayRow), axis=1)
-            print("SHAPE", np.shape(OneOfNEncodingArray))
-            print(OneOfNEncodingArray[:-20])        
+            # print("SHAPE", np.shape(OneOfNEncodingArray))
+            # print(OneOfNEncodingArray[:-20])        
     OneOfNEncodingArray = np.delete(OneOfNEncodingArray,0, axis=1)  
     # OneOfNEncodingtarget = np.delete(OneOfNEncodingtarget,0, axis=1)       
     return OneOfNEncodingArray 
@@ -433,10 +433,10 @@ for x in diagonalOnes:
     #     valid_tgtZero[i][col] = 1      
     #
 
-    print('--------------------------------------------------')
+    # print('--------------------------------------------------')
                 
     for idx,i in np.ndenumerate(results[:,0]): 
-        print("----- "+str(i))
+        # print("----- "+str(i))
         # print(np.shape(net.weights1))
         # print(np.shape(net.weights2))
         # weights1 = 0
@@ -461,8 +461,8 @@ for x in diagonalOnes:
         # weights2 = net.weights2
         # for item in weights1:
         #     print(item)
-        print(np.shape(net.weights1))
-        print(np.shape(net.weights2))
+        # print(np.shape(net.weights1))
+        # print(np.shape(net.weights2))
         
 
         pl.plot(results[:,0],results[:,1])
