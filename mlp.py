@@ -30,8 +30,8 @@ class mlp:
         # Initialise network
         self.weights1 = (np.random.rand(self.nin+1,self.nhidden)-0.5)*2/np.sqrt(self.nin)
         self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
-        # print(self.weights1)
-        # print(self.weights2)
+        print(np.shape(self.weights1))
+        print(np.shape(self.weights2))
     def earlystopping(self,inputs,targets,valid,validtargets,eta,niterations=100):
     
         valid = np.concatenate((valid,-np.ones((np.shape(valid)[0],1))),axis=1)

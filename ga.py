@@ -15,7 +15,8 @@ import random
 import pylab as pl
 import numpy as np
 # import fourpeaks as fF
-import billsfit as bF
+import billsfit as bf
+
 
 class ga:
 
