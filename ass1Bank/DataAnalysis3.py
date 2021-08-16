@@ -452,7 +452,7 @@ for x in diagonalOnes:
         
         # net.mlptrain(train_in,train_tgt,i,100)
         # net.confmat(train_in,train_tgt)
-        net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,0.1) 
+        net.earlystopping(train_in,train_tgt,valid_in,valid_tgt,100) 
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         # net.confmat(valid_in,valid_tgt)
         print("******************Percentage accuracy",percentageAccuracy)

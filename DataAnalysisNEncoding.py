@@ -18,6 +18,7 @@ import string
 
 from numpy import asarray
 from numpy import savetxt
+# from ass1Bank.DataAnalysisNEncoding2 import weights1
 # from ass1Bank.DataAnalysis import deleteColum
     
 filenameIn = "bank.csv"
@@ -31,9 +32,10 @@ NumAfterDeletingColumns = [0,5,8,9,10]
 
 
 
+
 def readDataFromFile(filename):
  
-    names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
+    # names = ['age','job','marital','education','default credit','housing','loan','contact','month','day_of_week','duration','campaign','pdays','previous','poutcome','emp.var.rate','cons.price.idx','cons.conf.idx','euribor3m',' nr.employed','subscribed']
 
     with open(filename, 'r') as f:
         np_df = list(csv.reader(f, delimiter=";"))
@@ -268,12 +270,78 @@ def oneOfNEncodingByColumn(newArrayData):
 '''
 ---------------------------------main------------------------------------------------
 '''
-
-    
-def runMLP():
-    print("start runMLP")
+def getData():
+    print("start get Data")
     numpy_df = readDataFromFile(filenameIn)
+    newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
+    i=0
+    handle_non_numerical_data(numpy_df,i,newArrayData)
     
+    newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
+    
+    '''
+    normalizing data using min and max
+    '''
+    newArrayData = normalizeData2(newArrayData,0) # age
+    # newArrayData = normalizeData2(newArrayData,1) #job
+    # newArrayData = normalizeData2(newArrayData,2) #marital
+    # newArrayData = normalizeData2(newArrayData,3) #education
+    # newArrayData = normalizeData2(newArrayData,4) #default
+    newArrayData = normalizeData2(newArrayData,5) #balance
+    # newArrayData = normalizeData2(newArrayData,6) #housing
+    # newArrayData = normalizeData2(newArrayData,7) #loan
+    # newArrayData = normalizeData2(newArrayData,8) #contact
+    # newArrayData = normalizeData2(newArrayData,9) #day
+    # newArrayData = normalizeData2(newArrayData,10) #month
+    newArrayData = normalizeData2(newArrayData,11) #duration
+    newArrayData = normalizeData2(newArrayData,12) #campaign
+    newArrayData = normalizeData2(newArrayData,13) #pdays
+    newArrayData = normalizeData2(newArrayData,14) #previous
+    # newArrayData = normalizeData2(newArrayData,15) #poutcome
+    # newArrayData = normalizeData2(newArrayData,16) # target
+    '''
+    randomly shuffle data
+    '''
+    newArrayData = ShuffleDataRandomly(newArrayData)
+    
+    '''
+    remove column 8 and column 10 
+    '''
+    # print(np.shape(newArrayData))
+    newData = np.delete(newArrayData,11, axis=1)
+    newData = np.delete(newData,10, axis=1)
+    newData = np.delete(newData,9, axis=1)
+    newData = np.delete(newData,8, axis=1)
+    
+    NewEncodedArray = oneOfNEncodingByColumn(newData)
+    storeDatainfile(NewEncodedArray)
+    
+    
+    sizeTestData = (np.shape(NewEncodedArray)[0])*0.3
+    testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
+    
+        ############################################################################
+    
+    testDataCol = np.shape(testData)[1]
+    testDataRow = np.shape(testData)[0]
+    TrainingDataCol = np.shape(trainingData)[1]
+    TrainingDataColDataRow = np.shape(trainingData)[0]
+    
+    
+    testing_in = testData[::,:testDataCol-2]
+    testing_tgt = testData[::,testDataCol-2:testDataCol]
+    train_in = trainingData[::,:TrainingDataCol-2]
+    train_tgt = trainingData[::,TrainingDataCol-2:TrainingDataCol]
+    
+    return  testing_in,testing_tgt,train_in,train_tgt
+    
+    
+    
+def runMLP(testing_in,testing_tgt,train_in,train_tgt,weight1,weight2):
+    print("start runMLP")
+    # numpy_df = readDataFromFile(filenameIn)
+    #
+
     # print(np.shape(numpy_df))
     
     # numpy_df = ShuffleDataRandomly(numpy_df)
@@ -284,12 +352,13 @@ def runMLP():
     
     # newArrayDataBalanced,validData = BalanceSampling(numpy_df,1000)
     
-    newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
-    i=0
-    handle_non_numerical_data(numpy_df,i,newArrayData)
-    
-    newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
-    
+    # newArrayData = np.zeros(np.shape(numpy_df)) # create zero array that will be used to hold the numerical values created for the strings
+    # i=0
+    # handle_non_numerical_data(numpy_df,i,newArrayData)
+    #
+    # newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
+    #
+
     
     # '''
     # count yes vs no 
@@ -320,116 +389,122 @@ def runMLP():
     
     
     
-    
-    
-    '''
-    normalizing data using min and max
-    '''
-    newArrayData = normalizeData2(newArrayData,0) # age
-    # newArrayData = normalizeData2(newArrayData,1) #job
-    # newArrayData = normalizeData2(newArrayData,2) #marital
-    # newArrayData = normalizeData2(newArrayData,3) #education
-    # newArrayData = normalizeData2(newArrayData,4) #default
-    newArrayData = normalizeData2(newArrayData,5) #balance
-    # newArrayData = normalizeData2(newArrayData,6) #housing
-    # newArrayData = normalizeData2(newArrayData,7) #loan
-    # newArrayData = normalizeData2(newArrayData,8) #contact
-    # newArrayData = normalizeData2(newArrayData,9) #day
-    # newArrayData = normalizeData2(newArrayData,10) #month
-    newArrayData = normalizeData2(newArrayData,11) #duration
-    newArrayData = normalizeData2(newArrayData,12) #campaign
-    newArrayData = normalizeData2(newArrayData,13) #pdays
-    newArrayData = normalizeData2(newArrayData,14) #previous
-    # newArrayData = normalizeData2(newArrayData,15) #poutcome
-    # newArrayData = normalizeData2(newArrayData,16) # target
-    
-    
-    # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
-    # pl.show()
-    
-    '''
-    randomly shuffle data
-    '''
-    newArrayData = ShuffleDataRandomly(newArrayData)
-    
-    '''
-    remove column 8 and column 10 
-    '''
-    # print(np.shape(newArrayData))
-    newData = np.delete(newArrayData,11, axis=1)
-    newData = np.delete(newData,10, axis=1)
-    newData = np.delete(newData,9, axis=1)
-    newData = np.delete(newData,8, axis=1)
-    
-    # print(np.shape(newData))
-    
-    
-    
-    NewEncodedArray = oneOfNEncodingByColumn(newData)
-    # deleteColum(NewEncodedArray,0)
-    # deleteColum(NewEncodedArray,1)
-    
-    
-    storeDatainfile(NewEncodedArray)
-    
-    
-    sizeTestData = (np.shape(NewEncodedArray)[0])*0.3
-    testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
-    
-    # folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
-    
-    # use different combinations of k-fold cross validation values 
-    ############################################################################
-    results = np.array([(15,0)])
-    
-    testDataCol = np.shape(testData)[1]
-    testDataRow = np.shape(testData)[0]
-    TrainingDataCol = np.shape(trainingData)[1]
-    TrainingDataColDataRow = np.shape(trainingData)[0]
-    
-    
-    testing_in = testData[::,:testDataCol-2]
-    testing_tgt = testData[::,testDataCol-2:testDataCol]
-    train_in = trainingData[::,:TrainingDataCol-2]
-    traint_gt = trainingData[::,TrainingDataCol-2:TrainingDataCol]
-    
-    
+    #
+    #
+    # '''
+    # normalizing data using min and max
+    # '''
+    # newArrayData = normalizeData2(newArrayData,0) # age
+    # # newArrayData = normalizeData2(newArrayData,1) #job
+    # # newArrayData = normalizeData2(newArrayData,2) #marital
+    # # newArrayData = normalizeData2(newArrayData,3) #education
+    # # newArrayData = normalizeData2(newArrayData,4) #default
+    # newArrayData = normalizeData2(newArrayData,5) #balance
+    # # newArrayData = normalizeData2(newArrayData,6) #housing
+    # # newArrayData = normalizeData2(newArrayData,7) #loan
+    # # newArrayData = normalizeData2(newArrayData,8) #contact
+    # # newArrayData = normalizeData2(newArrayData,9) #day
+    # # newArrayData = normalizeData2(newArrayData,10) #month
+    # newArrayData = normalizeData2(newArrayData,11) #duration
+    # newArrayData = normalizeData2(newArrayData,12) #campaign
+    # newArrayData = normalizeData2(newArrayData,13) #pdays
+    # newArrayData = normalizeData2(newArrayData,14) #previous
+    # # newArrayData = normalizeData2(newArrayData,15) #poutcome
+    # # newArrayData = normalizeData2(newArrayData,16) # target
+    #
+    #
+    # # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
+    # # pl.show()
+    #
+    # '''
+    # randomly shuffle data
+    # '''
+    # newArrayData = ShuffleDataRandomly(newArrayData)
+    #
+    # '''
+    # remove column 8 and column 10 
+    # '''
+    # # print(np.shape(newArrayData))
+    # newData = np.delete(newArrayData,11, axis=1)
+    # newData = np.delete(newData,10, axis=1)
+    # newData = np.delete(newData,9, axis=1)
+    # newData = np.delete(newData,8, axis=1)
+    #
+    # # print(np.shape(newData))
+    #
+    #
+    #
+    # NewEncodedArray = oneOfNEncodingByColumn(newData)
+    # # deleteColum(NewEncodedArray,0)
+    # # deleteColum(NewEncodedArray,1)
+    #
+    #
+    # storeDatainfile(NewEncodedArray)
+    #
+    #
+    # sizeTestData = (np.shape(NewEncodedArray)[0])*0.3
+    # testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
+    #
+    # # folds, diagonalOnes = KFoldcrossValidationData(trainingData,3) # divide training data in folds
+    #
+    # # use different combinations of k-fold cross validation values 
+    # ############################################################################
+    # results = np.array([(0,0)])
+    #
+    # testDataCol = np.shape(testData)[1]
+    # testDataRow = np.shape(testData)[0]
+    # TrainingDataCol = np.shape(trainingData)[1]
+    # TrainingDataColDataRow = np.shape(trainingData)[0]
+    #
+    #
+    # testing_in = testData[::,:testDataCol-2]
+    # testing_tgt = testData[::,testDataCol-2:testDataCol]
+    # train_in = trainingData[::,:TrainingDataCol-2]
+    # train_tgt = trainingData[::,TrainingDataCol-2:TrainingDataCol]
+    #
+
+    results = np.array([(10,0)])
     for idx,i in np.ndenumerate(results[:,0]):
          
-            # print("----- "+str(i))
-            # print(np.shape(net.weights1))
-            # print(np.shape(net.weights2))
-            # weights1 = 0
-            # weights2 = 0
-            #
-    
-            # nin = np.shape(train_in)[1]
-            # nout = np.shape(traint_gt)[1]
-            #
-            # weights1 = (np.random.rand(nin+1,i)-0.5)*2/np.sqrt(nin)
-            # weights2 = (np.random.rand(i+1,nout)-0.5)*2/np.sqrt(i)
-    
-            net = mlp.mlp(train_in,traint_gt,i,outtype = 'softmax')#different types of out puts: linear, logistic,softmax
-            # weights1,weights2 = net.mlptrain(train_in,train_tgt,0.25,101)
-            # print("weights 1",weights1)
-            # print("weights 2",weights2)
-            error = net.mlptrain(train_in,traint_gt,0.25,101)
-            errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,train_in,traint_gt,0.1) 
-            percentageAccuracy = net.confmat(testing_in,testing_tgt)    
-            results[idx,1] = percentageAccuracy
-            # weights1,weights2 = net.mlpfwd(inputs)
-            # weights2 = net.weights2
-            # for item in weights1:
-            #     print(item)
-            # print(np.shape(net.weights1))
-            # print(np.shape(net.weights2))
-    
-    
-    pl.plot(results[:,0],results[:,1])
-    pl.show()
+        print("----- "+str(i))
+                # print(np.shape(net.weights1))
+                # print(np.shape(net.weights2))
+                # weights1 = 0
+                # weights2 = 0
+                #
+        
+                # nin = np.shape(train_in)[1]
+                # nout = np.shape(traint_gt)[1]
+                #
+                # weights1 = (np.random.rand(nin+1,i)-0.5)*2/np.sqrt(nin)
+                # weights2 = (np.random.rand(i+1,nout)-0.5)*2/np.sqrt(i)
+        
+        net = mlp.mlp(train_in,train_tgt,i,weight1,weight2,outtype = 'softmax') #different types of out puts: linear, logistic,softmax
 
+                
+                # print("weights 1",weights1)
+                # print("weights 2",weights2)
+        print("training")
+        error = net.mlptrain(train_in,train_tgt,0.25,101)
+        print("early stopping")
+        # errorEarlyStoppingError = net.earlystopping(train_in,train_tgt,train_in,train_tgt,5) 
+        print("confusion matrix")
+        percentageAccuracy = net.confmat(testing_in,testing_tgt)    
+        results[idx,1] = percentageAccuracy
+                # weights1,weights2 = net.mlpfwd(inputs)
+                # net.weights2 = weights2
+                # for item in weights1:
+                #     print(item)
+                # print(np.shape(net.weights1))
+                # print(np.shape(net.weights2))
+    # pl.plot(results[:,0],results[:,1])
+    # pl.show()
+            
+    return(percentageAccuracy)
 
-# runMLP()
+#
+# testing_in,testing_tgt,train_in,train_tgt = getData()
+# runMLP(testing_in,testing_tgt,train_in,train_tgt)
 
 
 

@@ -46,6 +46,7 @@ class ga:
 		self.population = np.random.rand(self.populationSize,self.stringLength)
   # self.population = np.where(self.population<0.5,0,1)
 		
+		
 	def runGA(self):
 		"""The basic loop"""
   # pl.ion()

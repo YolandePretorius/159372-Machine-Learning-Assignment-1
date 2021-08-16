@@ -9,12 +9,13 @@
 # Stephen Marsland, 2008, 2014
 
 import numpy as np
-# from ass1Bank.DataAnalysis import weights1, weights2
+
 
 class mlp:
     """ A Multi-Layer Perceptron"""
     
-    def __init__(self,inputs,targets,nhidden,beta=1,momentum=0.9,outtype='logistic'):
+    def __init__(self,inputs,targets,nhidden,weight1,weight2,beta=1,momentum=0.9,outtype='logistic'):
+    # def __init__(self,inputs,targets,nhidden,beta=1,momentum=0.9,outtype='logistic'):
         """ Constructor """
         # Set up network size
         self.nin = np.shape(inputs)[1]
@@ -28,10 +29,13 @@ class mlp:
         # self.weights1 = weights1
         # self.weights2 = weights2
         # Initialise network
-        self.weights1 = (np.random.rand(self.nin+1,self.nhidden)-0.5)*2/np.sqrt(self.nin)
-        self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
+        # self.weights1 = (np.random.rand(self.nin+1,self.nhidden)-0.5)*2/np.sqrt(self.nin)
+        # self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
+        self.weights1 = weight1
+        self.weights2 = weight2
         print(np.shape(self.weights1))
         print(np.shape(self.weights2))
+        
     def earlystopping(self,inputs,targets,valid,validtargets,eta,niterations=100):
     
         valid = np.concatenate((valid,-np.ones((np.shape(valid)[0],1))),axis=1)
@@ -43,7 +47,6 @@ class mlp:
         count = 0
         while (((old_val_error1 - new_val_error) > 0.001) or ((old_val_error2 - old_val_error1)>0.001)):
             count+=1
-            # print(count)
             self.mlptrain(inputs,targets,eta,niterations)
             old_val_error2 = old_val_error1
             old_val_error1 = new_val_error

@@ -454,7 +454,7 @@ for x in diagonalOnes:
         # print("weights 1",weights1)
         # print("weights 2",weights2)
         error = net.mlptrain(train_in,traint_gt,0.25,101)
-        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,valid_in,valid_tgt,0.1) 
+        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,valid_in,valid_tgt,100) 
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         results[idx,1] = percentageAccuracy
         # weights1,weights2 = net.mlpfwd(inputs)

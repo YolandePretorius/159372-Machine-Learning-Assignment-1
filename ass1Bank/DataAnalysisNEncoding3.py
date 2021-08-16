@@ -375,7 +375,7 @@ testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
 
 # use different combinations of k-fold cross validation values 
 ############################################################################
-results = np.array([(15,0)])
+results = np.array([(10,0)])
 
 testDataCol = np.shape(testData)[1]
 testDataRow = np.shape(testData)[0]
@@ -409,7 +409,7 @@ for idx,i in np.ndenumerate(results[:,0]):
         # print("weights 1",weights1)
         # print("weights 2",weights2)
         error = net.mlptrain(train_in,traint_gt,0.25,101)
-        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,train_in,traint_gt,0.1) 
+        errorEarlyStoppingError = net.earlystopping(train_in,traint_gt,train_in,traint_gt,10)
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
         results[idx,1] = percentageAccuracy
         # weights1,weights2 = net.mlpfwd(inputs)
