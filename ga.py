@@ -44,19 +44,19 @@ class ga:
 		self.tournment = tournament
 
 		self.population = np.random.rand(self.populationSize,self.stringLength)
-  # self.population = np.where(self.population<0.5,0,1)
+        # self.population = np.where(self.population<0.5,0,1)
 		
 		
 	def runGA(self):
 		"""The basic loop"""
   # pl.ion()
-		#plotfig = pl.figure()
+  # plotfig = pl.figure()
 		bestfit = np.zeros(self.nEpochs)
 
 		for i in range(self.nEpochs):
 			# Compute fitness of the population
 			fitness = eval(self.fitnessFunction)(self.population)
-			fitness = fitness.astype('float')
+   # fitness = fitness.astype('float')
 
 			# Pick parents -- can do in order since they are randomised
 			newPopulation = self.fps(self.population,fitness)
@@ -78,9 +78,9 @@ class ga:
 			self.population = newPopulation
 			bestfit[i] = fitness.max()
 
-			if (np.mod(i,100)==0):
+			if (np.mod(i,2)==0):
 				print (i, fitness.max())
-			#pl.plot([i],[fitness.max()],'r+')
+			pl.plot([i],[fitness.max()],'r+')
 
 		pl.plot(bestfit,'kx-')
 		pl.show()
@@ -139,9 +139,16 @@ class ga:
 		
 	def mutate(self,population):
 		# Mutation
-		whereMutate = np.random.rand(np.shape(population)[0],np.shape(population)[1])
-		population[np.where(whereMutate < self.mutationProb)] = 1 - population[np.where(whereMutate < self.mutationProb)]
-		return population
+  		# whereMutate = (np.random.rand(np.shape(population)[0],np.shape(population)[1]))
+  		print("Before",population)
+  		sumpopBefore = np.sum(population)
+  		print("Before sum",sumpopBefore)
+  		whereMutate = np.random.rand(np.shape(population)[0],np.shape(population)[1])
+	  	population[np.where(whereMutate < self.mutationProb)] = 1 - population[np.where(whereMutate < self.mutationProb)]
+	  	print("After",population)
+	  	sumpopAfter = np.sum(population)
+	  	print("After sum",sumpopAfter)
+	  	return population
 
 	def elitism(self,oldPopulation,population,fitness):
 		best = np.argsort(fitness)

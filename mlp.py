@@ -33,8 +33,8 @@ class mlp:
         # self.weights2 = (np.random.rand(self.nhidden+1,self.nout)-0.5)*2/np.sqrt(self.nhidden)
         self.weights1 = weight1
         self.weights2 = weight2
-        print(np.shape(self.weights1))
-        print(np.shape(self.weights2))
+        # print(np.shape(self.weights1))
+        # print(np.shape(self.weights2))
         
     def earlystopping(self,inputs,targets,valid,validtargets,eta,niterations=100):
     
@@ -139,7 +139,7 @@ class mlp:
             for j in range(nclasses):
                 cm[i,j] = np.sum(np.where(outputs==i,1,0)*np.where(targets==j,1,0))
 
-        print("Confusion matrix is:")
+        # print("Confusion matrix is:")
         print(cm)
         print("Percentage Correct: ",np.trace(cm)/np.sum(cm)*100)
         return np.trace(cm)/np.sum(cm)*100

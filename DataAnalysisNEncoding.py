@@ -484,13 +484,13 @@ def runMLP(testing_in,testing_tgt,train_in,train_tgt,weight1,weight2):
                 
                 # print("weights 1",weights1)
                 # print("weights 2",weights2)
-        print("training")
-        error = net.mlptrain(train_in,train_tgt,0.25,101)
-        print("early stopping")
+        # print("training")
+        # error = net.mlptrain(train_in,train_tgt,0.25,101)
+        # print("early stopping")
         # errorEarlyStoppingError = net.earlystopping(train_in,train_tgt,train_in,train_tgt,5) 
-        print("confusion matrix")
+        # print("confusion matrix")
         percentageAccuracy = net.confmat(testing_in,testing_tgt)    
-        results[idx,1] = percentageAccuracy
+        # results[idx,1] = percentageAccuracy
                 # weights1,weights2 = net.mlpfwd(inputs)
                 # net.weights2 = weights2
                 # for item in weights1:
