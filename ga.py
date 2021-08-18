@@ -43,17 +43,20 @@ class ga:
 		self.nElite = nElite
 		self.tournment = tournament
 
-		self.population = np.random.rand(self.populationSize,self.stringLength)
+		self.population = (np.random.rand(self.populationSize,self.stringLength)-0.5)*2
+	
         # self.population = np.where(self.population<0.5,0,1)
-		
+		print(self.population)
 		
 	def runGA(self):
 		"""The basic loop"""
+
   # pl.ion()
   # plotfig = pl.figure()
 		bestfit = np.zeros(self.nEpochs)
 
 		for i in range(self.nEpochs):
+			print("//////////////////////////////", i)
 			# Compute fitness of the population
 			fitness = eval(self.fitnessFunction)(self.population)
    # fitness = fitness.astype('float')
@@ -78,7 +81,7 @@ class ga:
 			self.population = newPopulation
 			bestfit[i] = fitness.max()
 
-			if (np.mod(i,2)==0):
+			if (np.mod(i,5)==0):
 				print (i, fitness.max())
 			pl.plot([i],[fitness.max()],'r+')
 
@@ -139,17 +142,22 @@ class ga:
 		
 	def mutate(self,population):
 		# Mutation
-  		# whereMutate = (np.random.rand(np.shape(population)[0],np.shape(population)[1]))
-  		print("Before",population)
-  		sumpopBefore = np.sum(population)
-  		print("Before sum",sumpopBefore)
-  		whereMutate = np.random.rand(np.shape(population)[0],np.shape(population)[1])
-	  	population[np.where(whereMutate < self.mutationProb)] = 1 - population[np.where(whereMutate < self.mutationProb)]
-	  	print("After",population)
-	  	sumpopAfter = np.sum(population)
-	  	print("After sum",sumpopAfter)
-	  	return population
-
+		# whereMutate = (np.random.rand(np.shape(population)[0],np.shape(population)[1]))
+		print("Before",population)
+		sumpopBefore = np.sum(population)
+		print("Before sum",sumpopBefore)
+		rand_num = np.random.choice([0,1])
+		whereMutate = np.random.rand(np.shape(population)[0],np.shape(population)[1])
+		if (rand_num == 0):
+			population[np.where(whereMutate < self.mutationProb)] = population[np.where(whereMutate < self.mutationProb)]-0.1    
+		# population[np.where(whereMutate < self.mutationProb)] = 1 - population[np.where(whereMutate < self.mutationProb)]
+		else:
+			population[np.where(whereMutate < self.mutationProb)] = population[np.where(whereMutate < self.mutationProb)]+0.1
+		print("After",population)
+		sumpopAfter = np.sum(population)
+		print("After sum",sumpopAfter)
+		return population
+	
 	def elitism(self,oldPopulation,population,fitness):
 		best = np.argsort(fitness)
 		best = np.squeeze(oldPopulation[best[-self.nElite:],:])
