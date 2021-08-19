@@ -18,7 +18,8 @@ import string
 
 from numpy import asarray
 from numpy import savetxt
-# from ass1Bank.DataAnalysis import deleteColum
+import time
+
     
 filenameIn = "bank.csv"
 # filenameTestIn = "bank.csv"
@@ -267,7 +268,13 @@ def oneOfNEncodingByColumn(newArrayData):
 ---------------------------------main------------------------------------------------
 '''
 print("start")
+timeStart = time.time()
+print(timeStart)
+
 numpy_df = readDataFromFile(filenameIn)
+
+number_YesOut1 = sum(np.where(numpy_df[:,-1] == 'yes'))
+number_NoOut1  =  sum(np.where(numpy_df[:,-1] == 'no'))
 
 # print(np.shape(numpy_df))
 
@@ -290,8 +297,8 @@ newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
 # count yes vs no 
 #
 # '''
-# number_YesOut1 = (np.where(newArrayDataBalanced[:,-1] == 1))
-# number_NoOut1  =  (np.where(newArrayDataBalanced[:,-1] == 0))
+number_YesOut1 = sum(np.where(newArrayDataBalanced[:,-1] == 1))
+number_NoOut1  =  sum(np.where(newArrayDataBalanced[:,-1] == 0))
 # pl.plot(newArrayDataBalanced[number_NoOut1,0],newArrayDataBalanced[number_NoOut1,11],'rx')
 # pl.plot(newArrayDataBalanced[number_YesOut1,0],newArrayDataBalanced[number_YesOut1,11],'go')
 #
@@ -329,14 +336,16 @@ newArrayData = normalizeData2(newArrayData,5) #balance
 # newArrayData = normalizeData2(newArrayData,6) #housing
 # newArrayData = normalizeData2(newArrayData,7) #loan
 # newArrayData = normalizeData2(newArrayData,8) #contact
-# newArrayData = normalizeData2(newArrayData,9) #day
-# newArrayData = normalizeData2(newArrayData,10) #month
+# newArrayData = normalizeData2(newArrayData,9) #day remove
+# newArrayData = normalizeData2(newArrayData,10) #month  remove
 newArrayData = normalizeData2(newArrayData,11) #duration
 newArrayData = normalizeData2(newArrayData,12) #campaign
 newArrayData = normalizeData2(newArrayData,13) #pdays
 newArrayData = normalizeData2(newArrayData,14) #previous
 # newArrayData = normalizeData2(newArrayData,15) #poutcome
 # newArrayData = normalizeData2(newArrayData,16) # target
+
+
 
 
 # pl.plot(newArrayData[:,0],newArrayData[:,5],'ro')
@@ -348,9 +357,9 @@ randomly shuffle data
 newArrayData = ShuffleDataRandomly(newArrayData)
 
 '''
-remove column 8 and column 10 
+remove column 8,9,10 and 11 
 '''
-# print(np.shape(newArrayData))
+print(np.shape(newArrayData))
 newData = np.delete(newArrayData,11, axis=1)
 newData = np.delete(newData,10, axis=1)
 newData = np.delete(newData,9, axis=1)
@@ -375,7 +384,7 @@ testData, trainingData = seperateData70vs30(NewEncodedArray,sizeTestData)
 
 # use different combinations of k-fold cross validation values 
 ############################################################################
-results = np.array([(10,0)])
+results = np.array([(2,0),(5,0),(10,0),(15,0),(20,0),(25,0)])
 
 testDataCol = np.shape(testData)[1]
 testDataRow = np.shape(testData)[0]
@@ -419,7 +428,8 @@ for idx,i in np.ndenumerate(results[:,0]):
         # print(np.shape(net.weights1))
         # print(np.shape(net.weights2))
 
-
+timeStop = time.time()
+print(" =======================> ", timeStop - timeStart)
 pl.plot(results[:,0],results[:,1])
 pl.show()
 

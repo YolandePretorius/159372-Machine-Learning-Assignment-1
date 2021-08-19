@@ -277,7 +277,7 @@ def getData():
     i=0
     handle_non_numerical_data(numpy_df,i,newArrayData)
     
-    newArrayDataBalanced,validData = BalanceSampling(newArrayData,10578)
+    newArrayDataBalanced,validData = BalanceSampling(newArrayData,1042)
     
     '''
     normalizing data using min and max

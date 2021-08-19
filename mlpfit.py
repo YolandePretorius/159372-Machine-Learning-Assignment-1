@@ -17,6 +17,7 @@ def mlpfit(pop):
 
     fitness = np.zeros(np.shape(pop)[0])
     index = 0
+    testing_in,testing_tgt,train_in,train_tgt =DataAnalysisNEncoding.getData()
     for genome in pop:
         
         weight1 = genome[:350] # for 10 hidden layers
@@ -25,15 +26,7 @@ def mlpfit(pop):
         weigth2Reshape = weight2.reshape(11,2)
         
         
-        # for one hidden layer
-        # weight1 = genome[:35] # for 1 hidden layers
-        # weight2 = genome[35:39]
-        # weigth1Reshape = weight1.reshape(35,1)
-        # weigth2Reshape = weight2.reshape(2,2)
-        #
-
         
-        testing_in,testing_tgt,train_in,train_tgt =DataAnalysisNEncoding.getData()
         percentAccuracy = DataAnalysisNEncoding.runMLP(testing_in,testing_tgt,train_in,train_tgt,weigth1Reshape,weigth2Reshape)
         print(percentAccuracy)
         fitness[index] = percentAccuracy  # create a array with the fitness values per genome

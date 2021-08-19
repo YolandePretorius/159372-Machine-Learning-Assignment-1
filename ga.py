@@ -16,6 +16,7 @@ import pylab as pl
 import numpy as np
 # import fourpeaks as fF
 import mlpfit as mlpf
+import time
 
 
 class ga:
@@ -84,6 +85,9 @@ class ga:
 			if (np.mod(i,5)==0):
 				print (i, fitness.max())
 			pl.plot([i],[fitness.max()],'r+')
+			
+		timeStop = time.time()
+		print(timeStop)	
 
 		pl.plot(bestfit,'kx-')
 		pl.show()
