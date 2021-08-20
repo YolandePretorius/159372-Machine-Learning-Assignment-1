@@ -7,18 +7,9 @@ Use this to train the MLP
 '''
 
 import numpy as np
-import math
-import pandas as pd
 import pylab as pl
 from PartA import mlpPartA
-from fileinput import filename
-from numpy import genfromtxt, where, int0
 import csv
-from scipy.optimize import _group_columns
-from matplotlib.pyplot import axis
-import string
-
-from numpy import asarray
 from numpy import savetxt
 import time
 
@@ -26,7 +17,7 @@ import time
 filenameIn = "bank.csv"
 # filenameTestIn = "bank.csv"
 df = 0
-dict = {}
+
 itemlist = []
 listNumericalData = [0,5,9,11,12,13,14]
 lsitNonNumericalData = [1,2,3,6,7,8,9,10,15]
